@@ -74,7 +74,7 @@ export function VaultVisual({ locale }: { locale: Locale }) {
             className="flow-node-icon vault-icon"
             style={{
               borderColor: isSafe ? "var(--teal)" : "var(--red)",
-              boxShadow: isSafe ? "0 0 40px var(--teal-dim)" : "0 0 40px var(--red-dim)",
+              boxShadow: isSafe ? "0 0 18px var(--teal-dim)" : "0 0 18px var(--red-dim)",
               opacity: isSafe ? 1 : 0.4,
               borderStyle: isSafe ? "solid" : "dashed",
             }}

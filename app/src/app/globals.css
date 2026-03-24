@@ -92,7 +92,8 @@ html, body {
   gap: 8px;
   padding: 8px 12px;
   background: rgba(14, 17, 24, 0.85);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--glass-border);
   border-radius: 100px;
 }
@@ -180,8 +181,8 @@ html, body {
   position: absolute;
   top: 10%;
   right: 10%;
-  width: 700px;
-  height: 700px;
+  width: 560px;
+  height: 560px;
   border-radius: 50%;
   background: radial-gradient(
     circle,
@@ -191,7 +192,7 @@ html, body {
     rgba(59, 130, 246, 0.08) 70%,
     transparent 85%
   );
-  filter: blur(80px);
+  opacity: 0.75;
   pointer-events: none;
 }
 
@@ -200,8 +201,8 @@ html, body {
   position: absolute;
   bottom: 5%;
   left: 5%;
-  width: 500px;
-  height: 500px;
+  width: 340px;
+  height: 340px;
   border-radius: 50%;
   background: radial-gradient(
     circle,
@@ -209,7 +210,7 @@ html, body {
     rgba(6, 182, 212, 0.1) 40%,
     transparent 70%
   );
-  filter: blur(80px);
+  opacity: 0.65;
   pointer-events: none;
 }
 
@@ -296,12 +297,12 @@ html, body {
   color: var(--bg-void);
   background: var(--teal);
   cursor: pointer;
-  transition: all 0.25s;
+  transition: transform 0.25s, box-shadow 0.25s, opacity 0.25s;
   text-decoration: none;
 }
 
 .btn-primary:hover {
-  box-shadow: 0 0 40px var(--teal-glow);
+  box-shadow: 0 0 20px var(--teal-glow);
   transform: translateY(-1px);
 }
 
@@ -318,7 +319,7 @@ html, body {
   color: var(--ink-secondary);
   background: transparent;
   cursor: pointer;
-  transition: all 0.25s;
+  transition: border-color 0.25s, color 0.25s, background-color 0.25s;
   text-decoration: none;
 }
 
@@ -353,6 +354,8 @@ html, body {
 .vault-section {
   padding: 80px 0 60px;
   text-align: center;
+  content-visibility: auto;
+  contain-intrinsic-size: 800px;
 }
 
 .vault-section-head {
@@ -396,7 +399,7 @@ html, body {
   border: none;
   border-radius: 100px;
   cursor: pointer;
-  transition: all 0.25s;
+  transition: background-color 0.25s, color 0.25s;
   background: transparent;
   color: var(--ink-secondary);
 }
@@ -439,7 +442,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.4s;
+  transition: border-color 0.25s, box-shadow 0.25s, opacity 0.25s;
 }
 
 .flow-node-icon svg {
@@ -453,7 +456,7 @@ html, body {
   height: 88px;
   border-radius: 22px;
   border-color: var(--teal);
-  box-shadow: 0 0 40px var(--teal-dim);
+  box-shadow: 0 0 18px var(--teal-dim);
 }
 
 .flow-node-icon.vault-icon svg {
@@ -493,7 +496,7 @@ html, body {
   height: 8px;
   border-radius: 50%;
   background: var(--teal);
-  box-shadow: 0 0 12px var(--teal-glow);
+  box-shadow: 0 0 8px var(--teal-glow);
 }
 
 /* Flow step labels */
@@ -530,6 +533,8 @@ html, body {
   background: transparent;
   border: none;
   box-shadow: none;
+  content-visibility: auto;
+  contain-intrinsic-size: 760px;
 }
 
 .comparison-shell::before {
@@ -700,6 +705,8 @@ html, body {
 .demo-stage {
   margin: 80px 0;
   display: block;
+  content-visibility: auto;
+  contain-intrinsic-size: 720px;
 }
 
 .demo-checklist {
@@ -776,7 +783,7 @@ html, body {
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.25s;
+  transition: transform 0.25s, box-shadow 0.25s, opacity 0.25s, background-color 0.25s, color 0.25s, border-color 0.25s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -799,7 +806,7 @@ html, body {
 }
 
 .demo-button:not(.danger-button):not(.ghost-button):hover:not(:disabled) {
-  box-shadow: 0 4px 24px var(--teal-glow);
+  box-shadow: 0 4px 14px var(--teal-glow);
 }
 
 /* Delivery Failure Protection — red */
@@ -809,7 +816,7 @@ html, body {
 }
 
 .danger-button:hover:not(:disabled) {
-  box-shadow: 0 4px 24px var(--red-glow);
+  box-shadow: 0 4px 14px var(--red-glow);
 }
 
 /* Without Escrow — ghost */
@@ -847,6 +854,8 @@ html, body {
   background: transparent;
   border: none;
   box-shadow: none;
+  content-visibility: auto;
+  contain-intrinsic-size: 640px;
 }
 
 .tracker-header {
@@ -1016,12 +1025,6 @@ html, body {
 }
 .status-lost::before {
   background: var(--red);
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
 }
 
 /* ================================================
@@ -1029,6 +1032,8 @@ html, body {
    ================================================ */
 .recent-section {
   margin: 80px 0;
+  content-visibility: auto;
+  contain-intrinsic-size: 760px;
 }
 
 .recent-section-head {
@@ -1055,7 +1060,7 @@ html, body {
   background: var(--bg-card);
   border: 1px solid var(--glass-border);
   box-shadow: none;
-  transition: transform 0.3s, border-color 0.3s;
+  transition: transform 0.25s, border-color 0.25s;
 }
 
 .timeline-card:hover {

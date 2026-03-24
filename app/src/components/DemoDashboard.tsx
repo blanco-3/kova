@@ -30,6 +30,67 @@ const apiBase =
   process.env.NEXT_PUBLIC_DEMO_API_BASE ?? "http://127.0.0.1:8787";
 const localRunsKey = "x402-escrow-demo-runs";
 
+function isActiveRun(run: DemoRun) {
+  return run.status === "created" || run.status === "hash_committed";
+}
+
+function sameRuns(left: DemoRun[], right: DemoRun[]) {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  for (let index = 0; index < left.length; index += 1) {
+    const current = left[index];
+    const next = right[index];
+
+    if (
+      current.id !== next.id ||
+      current.status !== next.status ||
+      current.reason !== next.reason ||
+      current.startedAt !== next.startedAt ||
+      current.completedAt !== next.completedAt ||
+      current.escrowPda !== next.escrowPda ||
+      current.resultHash !== next.resultHash ||
+      current.resultPreview !== next.resultPreview ||
+      current.route !== next.route ||
+      current.amount !== next.amount ||
+      current.cluster !== next.cluster
+    ) {
+      return false;
+    }
+
+    if (current.txSignatures.length !== next.txSignatures.length) {
+      return false;
+    }
+
+    for (let signatureIndex = 0; signatureIndex < current.txSignatures.length; signatureIndex += 1) {
+      if (current.txSignatures[signatureIndex] !== next.txSignatures[signatureIndex]) {
+        return false;
+      }
+    }
+
+    if (current.timeline.length !== next.timeline.length) {
+      return false;
+    }
+
+    for (let timelineIndex = 0; timelineIndex < current.timeline.length; timelineIndex += 1) {
+      const currentItem = current.timeline[timelineIndex];
+      const nextItem = next.timeline[timelineIndex];
+
+      if (
+        currentItem.label !== nextItem.label ||
+        currentItem.status !== nextItem.status ||
+        currentItem.at !== nextItem.at ||
+        currentItem.details !== nextItem.details
+      ) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 async function fetchRuns(): Promise<DemoRun[]> {
   const response = await fetch(`${apiBase}/api/escrows`, {
     cache: "no-store",
@@ -83,12 +144,16 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
   const [busyScenario, setBusyScenario] = useState<DemoScenario | null>(null);
   const [error, setError] = useState<string | null>(null);
   const prompt = getDefaultPrompt(locale);
+  const hasActiveRuns = runs.some(isActiveRun);
 
   const refreshRuns = useEffectEvent(async () => {
     try {
       const nextRuns = await fetchRuns();
       startTransition(() => {
-        setRuns((current) => mergeRuns(current, nextRuns));
+        setRuns((current) => {
+          const merged = mergeRuns(current, nextRuns);
+          return sameRuns(current, merged) ? current : merged;
+        });
         setError(null);
       });
     } catch (refreshError) {
@@ -107,11 +172,21 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
       setRuns(readCachedRuns());
     });
     void refreshRuns();
-    const intervalId = setInterval(() => {
-      void refreshRuns();
-    }, 2_000);
-    return () => clearInterval(intervalId);
   }, [refreshRuns]);
+
+  useEffect(() => {
+    const intervalMs = hasActiveRuns ? 2_500 : runs.length > 0 ? 12_000 : 20_000;
+
+    const intervalId = setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") {
+        return;
+      }
+
+      void refreshRuns();
+    }, intervalMs);
+
+    return () => clearInterval(intervalId);
+  }, [hasActiveRuns, refreshRuns, runs.length]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
