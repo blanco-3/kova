@@ -16,15 +16,37 @@ export interface EscrowRow {
 }
 
 export function EscrowTracker({ escrows }: { escrows: EscrowRow[] }) {
+  if (escrows.length === 0) {
+    return (
+      <section className="tracker-card">
+        <div className="tracker-header">
+          <div>
+            <p className="section-label">Live Board</p>
+            <h2>Escrow Lifecycle Tracker</h2>
+          </div>
+        </div>
+        <div style={{ 
+          padding: "48px 24px", 
+          textAlign: "center", 
+          color: "var(--ink-muted)",
+          fontFamily: "var(--font-mono), monospace",
+          fontSize: "0.85rem"
+        }}>
+          No escrows recorded yet. Run a scenario to see the lifecycle.
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="tracker-card">
       <div className="tracker-header">
         <div>
-          <p className="section-label">Live board</p>
-          <h2>Escrow lifecycle tracker</h2>
+          <p className="section-label">Live Board</p>
+          <h2>Escrow Lifecycle Tracker</h2>
         </div>
         <p className="tracker-legend">
-          Created {"->"} HashCommitted {"->"} Completed / Refunded / Disputed
+          Created &rarr; HashCommitted &rarr; Completed / Refunded / Disputed
         </p>
       </div>
       <table className="tracker-table">

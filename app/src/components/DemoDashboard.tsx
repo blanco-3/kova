@@ -102,81 +102,103 @@ export function DemoDashboard() {
 
   return (
     <>
+      {/* Demo Controls Section */}
       <section className="demo-stage">
         <div className="demo-stage-copy">
-          <p className="section-label">Live demo controls</p>
-          <h2>Run the three judge-facing flows from one board.</h2>
+          <p className="section-label">Live Demo Controls</p>
+          <h2>Three scenarios. One question answered.</h2>
           <p>
-            This screen is optimized for one question only: does x402 settle
-            before delivery, or only after delivery is proven?
+            Does x402 settle before delivery, or only after delivery is proven?
+            Run each flow and watch the difference in real-time.
           </p>
           <div className="demo-checklist">
             <div>
               <span>1</span>
-              <p>Start with the direct-loss baseline.</p>
+              <p>Start with direct payment baseline</p>
             </div>
             <div>
               <span>2</span>
-              <p>Show the honest trade releasing from escrow.</p>
+              <p>Run the escrowed honest trade</p>
             </div>
             <div>
               <span>3</span>
-              <p>Show the malicious route refunding the buyer.</p>
+              <p>Trigger the rugpull defense</p>
             </div>
           </div>
         </div>
+
         <div className="control-panel">
-          <label className="prompt-field">
-            <span className="section-label">Prompt</span>
-            <textarea
-              className="prompt-input"
-              value={prompt}
-              onChange={(event) => setPrompt(event.target.value)}
-              rows={3}
-            />
-          </label>
-          <div className="button-row">
-            <button
-              className="demo-button"
-              disabled={busyScenario !== null}
-              onClick={() => void runScenario("success")}
-              type="button"
-            >
-              {busyScenario === "success" ? "Running..." : "Honest Trade"}
-            </button>
-            <button
-              className="demo-button danger-button"
-              disabled={busyScenario !== null}
-              onClick={() => void runScenario("timeout")}
-              type="button"
-            >
-              {busyScenario === "timeout" ? "Running..." : "Rugpull Defense"}
-            </button>
-            <button
-              className="demo-button ghost-button"
-              disabled={busyScenario !== null}
-              onClick={() => void runScenario("no_escrow")}
-              type="button"
-            >
-              {busyScenario === "no_escrow" ? "Running..." : "Without Escrow"}
-            </button>
-          </div>
-          <div className="control-grid">
-            <div className="control-meta">
-              <span>API</span>
-              <strong>{apiBase}</strong>
+          <div className="control-actions">
+            <label className="prompt-field">
+              <span className="section-label">Prompt</span>
+              <textarea
+                className="prompt-input"
+                value={prompt}
+                onChange={(event) => setPrompt(event.target.value)}
+                rows={2}
+                placeholder="Enter a test prompt for the demo..."
+              />
+            </label>
+
+            <div className="button-row">
+              <button
+                className="demo-button"
+                disabled={busyScenario !== null}
+                onClick={() => void runScenario("success")}
+                type="button"
+              >
+                {busyScenario === "success" ? (
+                  <span className="button-loading">Running...</span>
+                ) : (
+                  "Honest Trade"
+                )}
+              </button>
+              <button
+                className="demo-button danger-button"
+                disabled={busyScenario !== null}
+                onClick={() => void runScenario("timeout")}
+                type="button"
+              >
+                {busyScenario === "timeout" ? (
+                  <span className="button-loading">Running...</span>
+                ) : (
+                  "Rugpull Defense"
+                )}
+              </button>
+              <button
+                className="demo-button ghost-button"
+                disabled={busyScenario !== null}
+                onClick={() => void runScenario("no_escrow")}
+                type="button"
+              >
+                {busyScenario === "no_escrow" ? (
+                  <span className="button-loading">Running...</span>
+                ) : (
+                  "Without Escrow"
+                )}
+              </button>
             </div>
-            <div className="control-meta">
-              <span>Run count</span>
-              <strong>{runs.length}</strong>
+
+            <div className="control-grid">
+              <div className="control-meta">
+                <span>API Endpoint</span>
+                <strong>{apiBase}</strong>
+              </div>
+              <div className="control-meta">
+                <span>Total Runs</span>
+                <strong>{runs.length}</strong>
+              </div>
             </div>
+
+            {error && <p className="error-copy">{error}</p>}
           </div>
-          {error ? <p className="error-copy">{error}</p> : null}
         </div>
       </section>
 
+      {/* Before/After Comparison */}
       <SplitView scenarios={scenarioCards} />
 
+      {/* Metrics Section */}
       <section className="metrics-grid">
         {metrics.map((metric) => (
           <article key={metric.label} className="metric-card">
@@ -187,31 +209,40 @@ export function DemoDashboard() {
         ))}
       </section>
 
+      {/* Live Tracker */}
       <EscrowTracker escrows={trackerRows} />
 
-      <section className="timeline-grid">
-        {recentRuns.map((run) => (
-          <article key={run.id} className="timeline-card">
-            <div className="scenario-copy">
-              <div>
-                <p className="section-label">{run.scenario}</p>
-                <h2>{run.route}</h2>
-              </div>
-              <span className={`status-pill status-${run.status}`}>{run.status}</span>
-            </div>
-            <p>{run.reason}</p>
-            <div className="timeline-list">
-              {run.timeline.map((item) => (
-                <div key={`${run.id}-${item.at}-${item.label}`} className="timeline-item">
-                  <span className="timeline-label">{item.label}</span>
-                  <strong>{item.details}</strong>
-                  <p>{new Date(item.at).toLocaleTimeString()}</p>
+      {/* Recent Timeline */}
+      {recentRuns.length > 0 && (
+        <section className="timeline-grid">
+          {recentRuns.map((run) => (
+            <article key={run.id} className="timeline-card">
+              <div className="scenario-copy">
+                <div>
+                  <p className="section-label">{run.scenario.replace("_", " ")}</p>
+                  <h2>{run.route}</h2>
                 </div>
-              ))}
-            </div>
-          </article>
-        ))}
-      </section>
+                <span className={`status-pill status-${run.status}`}>
+                  {run.status.replace("_", " ")}
+                </span>
+              </div>
+              <p>{run.reason}</p>
+              <div className="timeline-list">
+                {run.timeline.slice(0, 4).map((item) => (
+                  <div
+                    key={`${run.id}-${item.at}-${item.label}`}
+                    className="timeline-item"
+                  >
+                    <span className="timeline-label">{item.label}</span>
+                    <strong>{item.details}</strong>
+                    <p>{new Date(item.at).toLocaleTimeString()}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
     </>
   );
 }

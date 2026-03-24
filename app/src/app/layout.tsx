@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
@@ -14,8 +14,13 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "x402 Escrow Protocol",
-  description: "Solana-native escrow for x402 payments",
+  title: "x402 Escrow Protocol | Solana-Native Escrow for Agent Commerce",
+  description:
+    "A delivery guarantee layer for x402 payments. Funds release only after service delivery is cryptographically proven on Solana.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0b0d",
 };
 
 export default function RootLayout({
@@ -27,4 +32,3 @@ export default function RootLayout({
     </html>
   );
 }
-
