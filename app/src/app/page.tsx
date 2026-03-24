@@ -5,25 +5,37 @@ import { DemoDashboard } from "../components/DemoDashboard";
 import { EscrowVaultHero } from "../components/EscrowVaultHero";
 import { getUiCopy, type Locale } from "../lib/i18n";
 
+type BrowserApi = typeof globalThis & {
+  localStorage?: {
+    getItem(key: string): string | null;
+    setItem(key: string, value: string): void;
+  };
+  navigator?: {
+    language?: string;
+  };
+};
+
+const browserApi = globalThis as BrowserApi;
+
 export default function HomePage() {
   const [locale, setLocale] = useState<Locale>("en");
   const copy = getUiCopy(locale);
 
   useEffect(() => {
-    const savedLocale = window.localStorage.getItem("x402-locale");
+    const savedLocale = browserApi.localStorage?.getItem("x402-locale");
     if (savedLocale === "en" || savedLocale === "ko") {
       setLocale(savedLocale);
       return;
     }
 
-    if (navigator.language.toLowerCase().startsWith("ko")) {
+    if (browserApi.navigator?.language?.toLowerCase().startsWith("ko")) {
       setLocale("ko");
     }
   }, []);
 
   function updateLocale(nextLocale: Locale) {
     setLocale(nextLocale);
-    window.localStorage.setItem("x402-locale", nextLocale);
+    browserApi.localStorage?.setItem("x402-locale", nextLocale);
   }
 
   return (
