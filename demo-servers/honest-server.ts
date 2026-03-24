@@ -2,8 +2,8 @@ import { createDemoApp } from "./common";
 
 const app = createDemoApp("Direct x402 access to the honest translation API");
 
-function renderResult(prompt: string) {
-  return `translated:${prompt}:안녕하세요`;
+function renderResult(_prompt: string) {
+  return "서비스 전달이 증명된 후에만 자금이 릴리즈됩니다.";
 }
 
 app.post("/direct", (req, res) => {

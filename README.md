@@ -177,7 +177,7 @@ Run the full devnet demo stack in separate terminals:
 ```bash
 npm run demo:honest
 npm run demo:malicious
-npx tsx middleware/src/index.ts
+npm run dev:middleware
 npm run dev:app
 ```
 

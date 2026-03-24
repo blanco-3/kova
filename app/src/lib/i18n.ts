@@ -297,6 +297,10 @@ const EXACT_RUNTIME_TEXT: Record<string, string> = {
     "판매자가 고정된 번역 결과를 반환했습니다",
   "Matching result hash released escrow to the seller":
     "결과 해시가 일치하여 에스크로가 판매자에게 릴리즈되었습니다",
+  "Escrow funded and waiting on service delivery":
+    "에스크로가 생성되었습니다. 서비스 전달을 기다리는 중입니다",
+  "Escrow funded and waiting for a result that never arrives":
+    "에스크로가 생성되었습니다. 전달되지 않을 결과를 기다리는 중입니다",
   "Seller never committed a result hash before submit deadline":
     "판매자가 제출 마감 전에 결과 해시를 커밋하지 않았습니다",
   "Client saw x402 instructions and proceeded without escrow protection":
