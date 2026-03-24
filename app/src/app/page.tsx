@@ -1,126 +1,86 @@
 import Link from "next/link";
-import { EscrowVault } from "../components/EscrowVault";
+import { EscrowVault } from "@/components/EscrowVault";
 
 export default function LandingPage() {
   return (
-    <>
-      <header className="site-header">
-        <span className="logo">x402</span>
-        <nav className="header-nav">
-          <Link href="/demo" className="header-link">
-            Demo
-          </Link>
-          <a
-            href="https://github.com/x402"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="header-link"
-          >
-            Protocol
-          </a>
-          <Link href="/demo" className="header-cta">
-            Open Demo
-          </Link>
-        </nav>
+    <main className="landing">
+      {/* Minimal header - just logo and one link */}
+      <header className="header">
+        <span className="wordmark">x402</span>
+        <Link href="/demo" className="header-link">
+          Demo
+        </Link>
       </header>
 
-      <section className="landing-hero">
-        <div className="hero-content">
-          <div className="hero-text">
-            <span className="hero-eyebrow">Solana Escrow Protocol</span>
-            <h1 className="hero-headline">
-              Payment should follow delivery, not precede it.
-            </h1>
-            <p className="hero-subline">
-              x402 lets AI agents pay. We make sure payment releases only after
-              service delivery is cryptographically proven on-chain.
-            </p>
-            <div className="hero-actions">
-              <Link href="/demo" className="btn-primary">
-                Open Demo
-              </Link>
-              <a
-                href="https://github.com/x402"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary"
-              >
-                Read Protocol
-              </a>
-            </div>
-          </div>
-
+      {/* Hero - vault object dominates, typography is precise */}
+      <section className="hero">
+        <div className="hero-vault">
           <EscrowVault />
         </div>
-      </section>
-
-      <section className="value-section">
-        <div className="value-grid">
-          <article className="value-block value-risk">
-            <span className="value-label">Without Escrow</span>
-            <h2>Payment clears before delivery is proven.</h2>
-            <p>
-              A direct x402 flow settles immediately. If the service stalls or
-              never delivers, the buyer has no recovery path. Funds are lost
-              silently.
-            </p>
-          </article>
-
-          <div className="value-divider" />
-
-          <article className="value-block value-safe">
-            <span className="value-label">With x402 Escrow</span>
-            <h2>Funds release only after verification.</h2>
-            <p>
-              The middleware swaps direct settlement for a Solana PDA vault.
-              Payment releases on hash match or refunds on timeout. Always
-              auditable, always recoverable.
-            </p>
-          </article>
+        
+        <div className="hero-copy">
+          <h1>
+            Payment follows delivery.
+            <br />
+            Not the other way around.
+          </h1>
+          <p>
+            Solana-native escrow for x402 agent commerce.
+            Funds release only after cryptographic proof of delivery.
+          </p>
         </div>
       </section>
 
-      <section className="proof-section">
-        <div className="proof-inner">
-          <span className="proof-label">Technical Foundation</span>
-          <div className="proof-list">
-            <div className="proof-item">
-              <strong>Solana PDA Vaults</strong>
-              <span>Deterministic escrow addresses derived from buyer + seller</span>
-            </div>
-            <div className="proof-item">
-              <strong>SHA-256 Commit Verify</strong>
-              <span>Seller commits result hash, buyer verifies before release</span>
-            </div>
-            <div className="proof-item">
-              <strong>Dual Timeout Protection</strong>
-              <span>Automatic refund if delivery window expires</span>
-            </div>
+      {/* Single contrast statement - no cards */}
+      <section className="contrast">
+        <div className="contrast-row">
+          <div className="contrast-item risk">
+            <span className="contrast-label">Without</span>
+            <p>Payment clears before delivery is proven. No recovery.</p>
+          </div>
+          <div className="contrast-divider" />
+          <div className="contrast-item safe">
+            <span className="contrast-label">With x402</span>
+            <p>Funds held in PDA vault. Released on hash match or refunded on timeout.</p>
           </div>
         </div>
       </section>
 
-      <footer className="site-footer">
-        <span className="footer-text">x402 Escrow Protocol</span>
-        <div className="footer-links">
-          <a
-            href="https://github.com/x402"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-link"
-          >
-            GitHub
-          </a>
-          <a
-            href="https://solana.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-link"
-          >
-            Solana
-          </a>
+      {/* Technical specs - minimal, typographic */}
+      <section className="specs">
+        <div className="spec">
+          <span className="spec-num">01</span>
+          <span className="spec-text">Solana PDA Vaults</span>
         </div>
+        <div className="spec">
+          <span className="spec-num">02</span>
+          <span className="spec-text">SHA-256 Commit-Verify</span>
+        </div>
+        <div className="spec">
+          <span className="spec-num">03</span>
+          <span className="spec-text">Dual Timeout Protection</span>
+        </div>
+      </section>
+
+      {/* CTA - single, confident */}
+      <section className="cta">
+        <Link href="/demo" className="cta-button">
+          Open Demo
+        </Link>
+        <a
+          href="https://github.com/x402"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cta-link"
+        >
+          Read Protocol Spec
+        </a>
+      </section>
+
+      {/* Footer - absolute minimum */}
+      <footer className="footer">
+        <span>x402 Escrow Protocol</span>
       </footer>
-    </>
+    </main>
   );
 }
