@@ -3,7 +3,6 @@
    Multicolor orb glow · Dark premium · Agent commerce
    ================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 :root {
   /* Deep dark palette */
@@ -91,9 +90,7 @@ html, body {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: rgba(14, 17, 24, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(14, 17, 24, 0.95);
   border: 1px solid var(--glass-border);
   border-radius: 100px;
 }

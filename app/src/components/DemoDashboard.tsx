@@ -30,8 +30,13 @@ const apiBase =
   process.env.NEXT_PUBLIC_DEMO_API_BASE ?? "http://127.0.0.1:8787";
 const localRunsKey = "x402-escrow-demo-runs";
 
+const ACTIVE_STALE_MS = 3 * 60 * 1000; // 3 minutes — any active run older than this is stale
+
 function isActiveRun(run: DemoRun) {
-  return run.status === "created" || run.status === "hash_committed";
+  if (run.status !== "created" && run.status !== "hash_committed") return false;
+  // Don't treat very old active runs as live — they'll never resolve without a reachable middleware
+  const age = Date.now() - new Date(run.startedAt).getTime();
+  return age < ACTIVE_STALE_MS;
 }
 
 function sameRuns(left: DemoRun[], right: DemoRun[]) {
