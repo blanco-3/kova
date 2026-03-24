@@ -147,9 +147,12 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
   const copy = getUiCopy(locale);
   const [runs, setRuns] = useState<DemoRun[]>([]);
   const [busyScenario, setBusyScenario] = useState<DemoScenario | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [hasLoadedRuns, setHasLoadedRuns] = useState(false);
   const prompt = getDefaultPrompt(locale);
   const hasActiveRuns = runs.some(isActiveRun);
+  const visibleError = runError ?? refreshError;
 
   const refreshRuns = useEffectEvent(async () => {
     try {
@@ -159,15 +162,19 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
           const merged = mergeRuns(current, nextRuns);
           return sameRuns(current, merged) ? current : merged;
         });
-        setError(null);
+        setHasLoadedRuns(true);
+        setRefreshError(null);
       });
     } catch (refreshError) {
+      console.warn("Failed to refresh demo runs", refreshError);
+      const message =
+        refreshError instanceof Error
+          ? refreshError.message
+          : "Failed to refresh demo runs";
       startTransition(() => {
-        setError(
-          refreshError instanceof Error
-            ? refreshError.message
-            : "Failed to refresh demo runs"
-        );
+        if (!hasLoadedRuns && runs.length === 0) {
+          setRefreshError(message);
+        }
       });
     }
   });
@@ -200,7 +207,7 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
 
   async function runScenario(scenario: DemoScenario) {
     setBusyScenario(scenario);
-    setError(null);
+    setRunError(null);
     try {
       const response = await fetch(`${apiBase}/api/demo/run`, {
         method: "POST",
@@ -219,7 +226,7 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
       if (run?.id) setRuns((current) => mergeRuns(current, [run]));
       await refreshRuns();
     } catch (runError) {
-      setError(
+      setRunError(
         runError instanceof Error ? runError.message : "Failed to start demo run"
       );
     } finally {
@@ -284,7 +291,11 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
                 : "Review the escrow lifecycle and proof details in the recent executions board below. When live settlement is enabled, PDA and transaction links appear here as well."}
             </p>
 
-            {error && <p className="error-copy">{translateRuntimeText(error, locale)}</p>}
+            {visibleError && (
+              <p className="error-copy">
+                {translateRuntimeText(visibleError, locale)}
+              </p>
+            )}
           </div>
         </div>
       </section>
