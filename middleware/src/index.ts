@@ -245,8 +245,8 @@ async function runTimeoutScenario(run: DemoRun) {
     "Malicious server returned x402 payment instructions"
   );
 
-  const submitDeadline = Math.floor(Date.now() / 1000) + 4;
-  const verifyDeadline = submitDeadline + 12;
+  const submitDeadline = Math.floor(Date.now() / 1000) + 8;
+  const verifyDeadline = submitDeadline + 20;
   const created = await escrowClient.createEscrow({
     amount: amountAtomic,
     submitDeadline,
@@ -282,7 +282,7 @@ async function runTimeoutScenario(run: DemoRun) {
     clearTimeout(timer);
   }
 
-  await new Promise((resolve) => setTimeout(resolve, 2_500));
+  await new Promise((resolve) => setTimeout(resolve, 6_000));
 
   const refundSignature = await escrowClient.claimBuyerRefund(
     created.escrowPda,

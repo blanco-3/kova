@@ -178,9 +178,9 @@ Current program id:
 
 ## Submission assets
 
-- deck outline: [`pitch/deck-outline.md`](/Users/blanco/seoulana/pitch/deck-outline.md)
-- demo script: [`pitch/demo-script.md`](/Users/blanco/seoulana/pitch/demo-script.md)
-- judge Q&A: [`pitch/judge-qa.md`](/Users/blanco/seoulana/pitch/judge-qa.md)
+- deck outline: [pitch/deck-outline.md](pitch/deck-outline.md)
+- demo script: [pitch/demo-script.md](pitch/demo-script.md)
+- judge Q&A: [pitch/judge-qa.md](pitch/judge-qa.md)
 
 ## Current status
 
