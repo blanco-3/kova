@@ -143,6 +143,26 @@ function explorerHref(kind: "tx" | "address", value: string, cluster: string) {
     : `https://explorer.solana.com/address/${value}?cluster=devnet`;
 }
 
+function busyStatusCopy(scenario: DemoScenario, locale: Locale) {
+  if (locale === "ko") {
+    if (scenario === "success") {
+      return "정상 거래를 실행 중입니다. Devnet 확인까지 보통 3-5초 정도 걸립니다.";
+    }
+    if (scenario === "timeout") {
+      return "전달 실패 보호를 실행 중입니다. 환불 경로는 submit deadline을 기다리므로 약 15-20초 정도 걸릴 수 있습니다.";
+    }
+    return "에스크로 없는 직접 결제를 실행 중입니다. 보통 2-3초 안에 손실 상태가 기록됩니다.";
+  }
+
+  if (scenario === "success") {
+    return "Running Honest Trade. Devnet confirmation usually takes around 3-5 seconds.";
+  }
+  if (scenario === "timeout") {
+    return "Running Delivery Failure Protection. The refund path waits for the submit deadline, so this can take around 15-20 seconds.";
+  }
+  return "Running Without Escrow. The loss state is usually recorded within 2-3 seconds.";
+}
+
 export function DemoDashboard({ locale }: { locale: Locale }) {
   const copy = getUiCopy(locale);
   const [runs, setRuns] = useState<DemoRun[]>([]);
@@ -284,6 +304,18 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
                   : `◎ ${copy.demo.buttons.noEscrow}`}
               </button>
             </div>
+
+            {busyScenario ? (
+              <p className="control-status running-status">
+                {busyStatusCopy(busyScenario, locale)}
+              </p>
+            ) : (
+              <p className="control-status">
+                {locale === "ko"
+                  ? "한 번에 하나의 시나리오만 실행됩니다. 전달 실패 보호는 정상 거래보다 더 오래 걸립니다."
+                  : "Only one scenario runs at a time. Delivery Failure Protection takes longer than Honest Trade."}
+              </p>
+            )}
 
             <p className="proof-note">
               {locale === "ko"

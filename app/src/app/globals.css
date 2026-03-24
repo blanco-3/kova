@@ -722,6 +722,17 @@ html, body {
   background: var(--bg-deep);
 }
 
+.control-status {
+  min-height: 1.5rem;
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.running-status {
+  color: var(--orange);
+}
+
 .button-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
