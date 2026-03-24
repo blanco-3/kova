@@ -1,0 +1,11 @@
+[workspace]
+members = [
+  "programs/x402-escrow",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+
+[profile.release]
+overflow-checks = true

@@ -1,0 +1,53 @@
+{
+  "name": "x402-escrow-protocol",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "app",
+    "middleware"
+  ],
+  "scripts": {
+    "check:rust": "cargo check",
+    "check:ts": "tsc --noEmit -p tsconfig.json && npm --workspace middleware run typecheck && npm --workspace app run typecheck",
+    "anchor:build": "bash scripts/run-anchor.sh build --no-idl",
+    "anchor:test": "bash scripts/anchor-test.sh",
+    "test:ts": "ts-mocha -p tsconfig.json -t 120000 tests/**/*.ts",
+    "dev:app": "npm --workspace app run dev",
+    "dev:middleware": "npm --workspace middleware run dev",
+    "localnet:start": "bash scripts/localnet-start.sh",
+    "devnet:deploy": "bash scripts/devnet-deploy.sh",
+    "devnet:smoke": "tsx scripts/devnet-smoke.ts",
+    "demo:honest": "tsx demo-servers/honest-server.ts",
+    "demo:malicious": "tsx demo-servers/malicious-server.ts"
+  },
+  "dependencies": {
+    "@scure/base": "1.2.6",
+    "@solana/kit": "6.5.0",
+    "@x402/core": "2.8.0",
+    "@x402/express": "2.8.0",
+    "@x402/fetch": "2.8.0",
+    "@x402/svm": "2.8.0",
+    "cors": "2.8.5",
+    "dotenv": "17.2.3",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@coral-xyz/anchor": "0.30.1",
+    "@solana/spl-token": "0.4.14",
+    "@solana/web3.js": "1.98.4",
+    "@types/chai": "^5.2.3",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.4",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.7.2",
+    "chai": "^5.3.3",
+    "mocha": "^11.7.4",
+    "ts-node": "^10.9.2",
+    "ts-mocha": "^11.1.0",
+    "tsx": "^4.20.6",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
