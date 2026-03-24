@@ -68,7 +68,7 @@ const COPY = {
         "Run the escrowed honest trade",
         "Trigger the delivery failure protection flow",
       ],
-      prompt: "Prompt",
+      prompt: "Demo Request",
       promptPlaceholder: "Enter a test prompt for the demo...",
       buttons: {
         success: "Honest Trade",
@@ -164,7 +164,7 @@ const COPY = {
         "에스크로를 거친 정상 거래 실행",
         "전달 실패 보호 시나리오 실행",
       ],
-      prompt: "프롬프트",
+      prompt: "데모 요청 예시",
       promptPlaceholder: "데모에 사용할 테스트 프롬프트를 입력하세요...",
       buttons: {
         success: "정상 거래",
@@ -321,8 +321,8 @@ export function translateRoute(route: string, locale: Locale) {
 
 export function getDefaultPrompt(locale: Locale) {
   return locale === "ko"
-    ? "'서비스 전달이 증명될 때만 결제가 릴리즈된다'를 영어로 번역해줘."
-    : "Translate 'payment only releases when service delivery is proven' into Korean.";
+    ? "'서비스 전달이 증명된 후에만 자금이 릴리즈된다'를 영어로 번역해줘."
+    : "Translate 'funds release only after service delivery is proven' into Korean.";
 }
 
 export function localeTime(locale: Locale) {

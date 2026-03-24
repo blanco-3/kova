@@ -139,6 +139,13 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
       <section className="demo-stage">
         <div className="control-panel">
           <div className="control-actions">
+            <div className="prompt-field">
+              <span className="section-label">
+                {locale === "ko" ? "데모 요청 예시" : "DEMO REQUEST"}
+              </span>
+              <div className="prompt-preview">{prompt}</div>
+            </div>
+
             <div className="button-row">
               <button
                 className="demo-button"

@@ -728,6 +728,29 @@ html, body {
   gap: 24px;
 }
 
+.prompt-field {
+  display: grid;
+  gap: 10px;
+}
+
+.prompt-field .section-label {
+  color: var(--ink-muted);
+  margin-bottom: 0;
+  font-size: 0.68rem;
+}
+
+.prompt-preview {
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--glass-border);
+  background: var(--bg-deep);
+  color: var(--ink-primary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
 .button-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
