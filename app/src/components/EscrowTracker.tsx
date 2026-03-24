@@ -1,4 +1,5 @@
 import { StatusBadge } from "./StatusBadge";
+import { getUiCopy, type Locale } from "../lib/i18n";
 
 export interface EscrowRow {
   id: string;
@@ -15,14 +16,22 @@ export interface EscrowRow {
     | "lost";
 }
 
-export function EscrowTracker({ escrows }: { escrows: EscrowRow[] }) {
+export function EscrowTracker({
+  escrows,
+  locale,
+}: {
+  escrows: EscrowRow[];
+  locale: Locale;
+}) {
+  const copy = getUiCopy(locale);
+
   if (escrows.length === 0) {
     return (
       <section className="tracker-card">
         <div className="tracker-header">
           <div>
-            <p className="section-label">Live Board</p>
-            <h2>Escrow Lifecycle Tracker</h2>
+            <p className="section-label">{copy.tracker.sectionLabel}</p>
+            <h2>{copy.tracker.title}</h2>
           </div>
         </div>
         <div style={{ 
@@ -32,7 +41,7 @@ export function EscrowTracker({ escrows }: { escrows: EscrowRow[] }) {
           fontFamily: "var(--font-mono), monospace",
           fontSize: "0.85rem"
         }}>
-          No escrows recorded yet. Run a scenario to see the lifecycle.
+          {copy.tracker.empty}
         </div>
       </section>
     );
@@ -42,21 +51,19 @@ export function EscrowTracker({ escrows }: { escrows: EscrowRow[] }) {
     <section className="tracker-card">
       <div className="tracker-header">
         <div>
-          <p className="section-label">Live Board</p>
-          <h2>Escrow Lifecycle Tracker</h2>
+          <p className="section-label">{copy.tracker.sectionLabel}</p>
+          <h2>{copy.tracker.title}</h2>
         </div>
         <p className="tracker-legend">
-          Created &rarr; HashCommitted &rarr; Completed / Refunded / Disputed
+          {copy.tracker.legend}
         </p>
       </div>
       <table className="tracker-table">
         <thead>
           <tr>
-            <th>Escrow</th>
-            <th>Route</th>
-            <th>Amount</th>
-            <th>Hash</th>
-            <th>Status</th>
+            {copy.tracker.headers.map((header) => (
+              <th key={header}>{header}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
@@ -72,7 +79,7 @@ export function EscrowTracker({ escrows }: { escrows: EscrowRow[] }) {
                 <code>{escrow.hash}</code>
               </td>
               <td>
-                <StatusBadge status={escrow.status} />
+                <StatusBadge status={escrow.status} locale={locale} />
               </td>
             </tr>
           ))}

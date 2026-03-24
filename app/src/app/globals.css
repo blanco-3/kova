@@ -87,6 +87,46 @@ body::after {
   padding: 60px 0 120px;
 }
 
+.page-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  color: var(--ink-secondary);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.locale-switch {
+  display: inline-flex;
+  padding: 4px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--glass-medium);
+  backdrop-filter: blur(12px);
+}
+
+.locale-button {
+  border: 0;
+  background: transparent;
+  color: var(--ink-secondary);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.locale-button.active {
+  background: var(--ink-primary);
+  color: var(--bg-void);
+}
+
 /* ========================================
    HERO SECTION - Cinematic opening
 ======================================== */
@@ -1085,6 +1125,11 @@ body::after {
   .page-shell {
     width: calc(100% - 32px);
     padding: 32px 0 80px;
+  }
+
+  .page-toolbar {
+    justify-content: space-between;
+    flex-wrap: wrap;
   }
   
   .hero-stats,

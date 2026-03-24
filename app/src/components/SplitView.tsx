@@ -1,4 +1,5 @@
 import { StatusBadge } from "./StatusBadge";
+import { getUiCopy, type Locale } from "../lib/i18n";
 
 interface ScenarioLane {
   label: string;
@@ -21,16 +22,21 @@ export interface Scenario {
   lanes: ScenarioLane[];
 }
 
-export function SplitView({ scenarios }: { scenarios: Scenario[] }) {
+export function SplitView({
+  scenarios,
+  locale,
+}: {
+  scenarios: Scenario[];
+  locale: Locale;
+}) {
+  const copy = getUiCopy(locale);
+
   return (
     <section className="comparison-shell">
       <div className="comparison-head">
-        <p className="section-label">Before / After</p>
-        <h2>Same request. Two settlement outcomes.</h2>
-        <p>
-          The left lane shows why direct x402 is fragile. The right lane shows
-          the escrowed path that converts failure into an explicit refund.
-        </p>
+        <p className="section-label">{copy.comparison.sectionLabel}</p>
+        <h2>{copy.comparison.title}</h2>
+        <p>{copy.comparison.description}</p>
       </div>
 
       <div className="split-grid">
@@ -52,9 +58,9 @@ export function SplitView({ scenarios }: { scenarios: Scenario[] }) {
                 <div key={lane.label} className="lane-item">
                   <div className="scenario-copy">
                     <span className="lane-label">
-                      Step {index + 1}
+                      {copy.common.step} {index + 1}
                     </span>
-                    <StatusBadge status={lane.status} />
+                    <StatusBadge status={lane.status} locale={locale} />
                   </div>
                   <strong>{lane.title}</strong>
                   <p>{lane.note}</p>

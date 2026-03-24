@@ -1,3 +1,5 @@
+import { type Locale, translateStatus } from "../lib/i18n";
+
 type Status =
   | "created"
   | "hash_committed"
@@ -6,19 +8,16 @@ type Status =
   | "disputed"
   | "lost";
 
-const labels: Record<Status, string> = {
-  created: "Created",
-  hash_committed: "Committed",
-  completed: "Completed",
-  refunded: "Refunded",
-  disputed: "Disputed",
-  lost: "Lost",
-};
-
-export function StatusBadge({ status }: { status: Status }) {
+export function StatusBadge({
+  status,
+  locale = "en",
+}: {
+  status: Status;
+  locale?: Locale;
+}) {
   return (
     <span className={`status-pill status-${status}`}>
-      {labels[status]}
+      {translateStatus(status, locale)}
     </span>
   );
 }

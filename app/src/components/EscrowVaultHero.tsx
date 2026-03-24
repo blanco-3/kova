@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getUiCopy, type Locale } from "../lib/i18n";
 
-export function EscrowVaultHero() {
+export function EscrowVaultHero({ locale }: { locale: Locale }) {
   const [activeFlow, setActiveFlow] = useState<"safe" | "risk">("safe");
   const [animationPhase, setAnimationPhase] = useState(0);
+  const copy = getUiCopy(locale);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -31,7 +33,7 @@ export function EscrowVaultHero() {
         {/* Flow indicator */}
         <div className={`flow-indicator ${activeFlow}`}>
           <span className="flow-label">
-            {activeFlow === "safe" ? "Escrowed Flow" : "Direct Payment"}
+            {activeFlow === "safe" ? copy.vault.safeFlow : copy.vault.riskFlow}
           </span>
         </div>
 
@@ -45,7 +47,7 @@ export function EscrowVaultHero() {
               <circle cx="12" cy="7" r="4" />
             </svg>
           </div>
-          <span className="node-label">Buyer Wallet</span>
+          <span className="node-label">{copy.vault.buyerWallet}</span>
           <span className="node-address">8xK2...4mNp</span>
         </div>
 
@@ -81,11 +83,11 @@ export function EscrowVaultHero() {
             </div>
             <div className="vault-shimmer" />
           </div>
-          <span className="vault-label">Escrow PDA Vault</span>
+          <span className="vault-label">{copy.vault.vault}</span>
           <span className="vault-status">
             {activeFlow === "safe" 
-              ? animationPhase >= 2 ? "Hash Committed" : "Awaiting Commit"
-              : "Bypassed"}
+              ? animationPhase >= 2 ? copy.vault.hashCommitted : copy.vault.awaitingCommit
+              : copy.vault.bypassed}
           </span>
         </div>
 
@@ -108,9 +110,9 @@ export function EscrowVaultHero() {
               <line x1="12" y1="17" x2="12" y2="21" />
             </svg>
           </div>
-          <span className="node-label">Service Endpoint</span>
+          <span className="node-label">{copy.vault.serviceEndpoint}</span>
           <span className={`node-status ${activeFlow === "risk" ? "failed" : ""}`}>
-            {activeFlow === "safe" ? "Verified" : "Stalled"}
+            {activeFlow === "safe" ? copy.vault.verified : copy.vault.stalled}
           </span>
         </div>
 
@@ -123,7 +125,7 @@ export function EscrowVaultHero() {
               <line x1="15" y1="9" x2="9" y2="15" />
               <line x1="9" y1="9" x2="15" y2="15" />
             </svg>
-            <span>Funds Lost</span>
+            <span>{copy.vault.fundsLost}</span>
           </div>
         )}
 
@@ -135,7 +137,7 @@ export function EscrowVaultHero() {
               <circle cx="12" cy="12" r="10" />
               <polyline points="9,12 11,14 15,10" />
             </svg>
-            <span>Released</span>
+            <span>{copy.vault.released}</span>
           </div>
         )}
       </div>
