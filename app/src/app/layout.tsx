@@ -1,26 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const display = Space_Grotesk({
+const display = Inter({
   subsets: ["latin"],
   variable: "--font-display",
 });
 
-const mono = IBM_Plex_Mono({
+const mono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
   variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
-  title: "x402 Escrow Protocol | Solana-Native Escrow for Agent Commerce",
+  title: "x402 Escrow Protocol",
   description:
-    "A delivery guarantee layer for x402 payments. Funds release only after service delivery is cryptographically proven on Solana.",
+    "Payment should follow delivery, not precede it. Solana-native escrow for x402 agent commerce.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0b0d",
+  themeColor: "#050505",
 };
 
 export default function RootLayout({
