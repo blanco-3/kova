@@ -11,7 +11,6 @@ import { EscrowTracker } from "./EscrowTracker";
 import { SplitView } from "./SplitView";
 import {
   buildEscrowRows,
-  buildMetrics,
   buildScenarioCards,
   getDefaultPrompt,
   type DemoRun,
@@ -24,7 +23,6 @@ import {
   translateRuntimeText,
   translateScenario,
   translateStatus,
-  translateTimelineLabel,
   translateRoute,
 } from "../lib/i18n";
 
@@ -36,39 +34,24 @@ async function fetchRuns(): Promise<DemoRun[]> {
   const response = await fetch(`${apiBase}/api/escrows`, {
     cache: "no-store",
   });
-
   if (!response.ok) {
     throw new Error(`Failed to load escrows: ${response.status}`);
   }
-
   return response.json();
 }
 
 function mergeRuns(current: DemoRun[], incoming: DemoRun[]) {
   const merged = new Map<string, DemoRun>();
-
-  for (const run of current) {
-    merged.set(run.id, run);
-  }
-
-  for (const run of incoming) {
-    merged.set(run.id, run);
-  }
-
+  for (const run of current) merged.set(run.id, run);
+  for (const run of incoming) merged.set(run.id, run);
   return [...merged.values()].sort((a, b) => b.startedAt.localeCompare(a.startedAt));
 }
 
 function readCachedRuns() {
-  if (typeof window === "undefined") {
-    return [] as DemoRun[];
-  }
-
+  if (typeof window === "undefined") return [] as DemoRun[];
   try {
     const raw = window.localStorage.getItem(localRunsKey);
-    if (!raw) {
-      return [] as DemoRun[];
-    }
-
+    if (!raw) return [] as DemoRun[];
     const parsed = JSON.parse(raw) as DemoRun[];
     return Array.isArray(parsed) ? parsed : [];
   } catch {
@@ -110,7 +93,6 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
     const intervalId = setInterval(() => {
       void refreshRuns();
     }, 2_000);
-
     return () => clearInterval(intervalId);
   }, [refreshRuns]);
 
@@ -123,24 +105,19 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
   }, [locale, prompt]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
+    if (typeof window === "undefined") return;
     window.localStorage.setItem(localRunsKey, JSON.stringify(runs.slice(0, 12)));
   }, [runs]);
 
   async function runScenario(scenario: DemoScenario) {
     setBusyScenario(scenario);
     setError(null);
-
     try {
       const response = await fetch(`${apiBase}/api/demo/run`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ scenario, prompt }),
       });
-
       if (!response.ok) {
         const payload = await response.json().catch(() => null);
         throw new Error(
@@ -149,11 +126,8 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
             : `Demo run failed with ${response.status}`
         );
       }
-
       const run = (await response.json().catch(() => null)) as DemoRun | null;
-      if (run?.id) {
-        setRuns((current) => mergeRuns(current, [run]));
-      }
+      if (run?.id) setRuns((current) => mergeRuns(current, [run]));
       await refreshRuns();
     } catch (runError) {
       setError(
@@ -165,32 +139,40 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
   }
 
   const scenarioCards = buildScenarioCards(runs, locale);
-  const metrics = buildMetrics(runs, locale);
   const trackerRows = buildEscrowRows(runs, locale);
   const recentRuns = runs.slice(0, 3);
 
   return (
     <>
-      {/* Demo Controls Section */}
+      <SplitView scenarios={scenarioCards} locale={locale} />
+
       <section className="demo-stage">
         <div className="demo-stage-copy">
           <p className="section-label">{copy.demo.sectionLabel}</p>
-          <h2>{copy.demo.title}</h2>
-          <p>{copy.demo.description}</p>
-          <div className="demo-checklist">
-            {copy.demo.checklist.map((item, index) => (
-              <div key={item}>
-                <span>{index + 1}</span>
-                <p>{item}</p>
-              </div>
-            ))}
-          </div>
+          <h2>
+            {locale === "ko" ? (
+              <>
+                세 가지 시나리오. <span className="accent">하나의 질문.</span>
+              </>
+            ) : (
+              <>
+                Three scenarios. <span className="accent">One question.</span>
+              </>
+            )}
+          </h2>
+          <p>
+            {locale === "ko"
+              ? "전달이 실패했을 때 결제는 어떻게 되는가?"
+              : "What happens to the payment when delivery goes wrong?"}
+          </p>
         </div>
 
         <div className="control-panel">
           <div className="control-actions">
             <label className="prompt-field">
-              <span className="section-label">{copy.demo.prompt}</span>
+              <span className="section-label">
+                {locale === "ko" ? "태스크 프롬프트" : "TASK PROMPT"}
+              </span>
               <textarea
                 className="prompt-input"
                 value={prompt}
@@ -207,11 +189,9 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
                 onClick={() => void runScenario("success")}
                 type="button"
               >
-                {busyScenario === "success" ? (
-                  <span className="button-loading">{copy.demo.buttons.running}</span>
-                ) : (
-                  copy.demo.buttons.success
-                )}
+                {busyScenario === "success"
+                  ? copy.demo.buttons.running
+                  : `✓ ${copy.demo.buttons.success}`}
               </button>
               <button
                 className="demo-button danger-button"
@@ -219,11 +199,9 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
                 onClick={() => void runScenario("timeout")}
                 type="button"
               >
-                {busyScenario === "timeout" ? (
-                  <span className="button-loading">{copy.demo.buttons.running}</span>
-                ) : (
-                  copy.demo.buttons.timeout
-                )}
+                {busyScenario === "timeout"
+                  ? copy.demo.buttons.running
+                  : `✗ ${copy.demo.buttons.timeout}`}
               </button>
               <button
                 className="demo-button ghost-button"
@@ -231,11 +209,9 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
                 onClick={() => void runScenario("no_escrow")}
                 type="button"
               >
-                {busyScenario === "no_escrow" ? (
-                  <span className="button-loading">{copy.demo.buttons.running}</span>
-                ) : (
-                  copy.demo.buttons.noEscrow
-                )}
+                {busyScenario === "no_escrow"
+                  ? copy.demo.buttons.running
+                  : `◎ ${copy.demo.buttons.noEscrow}`}
               </button>
             </div>
 
@@ -245,7 +221,7 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
                 <strong>{apiBase}</strong>
               </div>
               <div className="control-meta">
-                <span>{copy.demo.totalRuns}</span>
+                <span>{locale === "ko" ? "총 실행 수" : "TOTAL EXECUTIONS"}</span>
                 <strong>{runs.length}</strong>
               </div>
             </div>
@@ -255,54 +231,70 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
         </div>
       </section>
 
-      {/* Before/After Comparison */}
-      <SplitView scenarios={scenarioCards} locale={locale} />
-
-      {/* Metrics Section */}
-      <section className="metrics-grid">
-        {metrics.map((metric) => (
-          <article key={metric.label} className="metric-card">
-            <span>{metric.label}</span>
-            <strong>{metric.value}</strong>
-            <p>{metric.caption}</p>
-          </article>
-        ))}
-      </section>
-
-      {/* Live Tracker */}
       <EscrowTracker escrows={trackerRows} locale={locale} />
 
-      {/* Recent Timeline */}
       {recentRuns.length > 0 && (
-        <section className="timeline-grid">
-          {recentRuns.map((run) => (
-            <article key={run.id} className="timeline-card">
-              <div className="scenario-copy">
-                <div>
-                  <p className="section-label">{translateScenario(run.scenario, locale)}</p>
-                  <h2>{translateRoute(run.route, locale)}</h2>
-                </div>
-                <span className={`status-pill status-${run.status}`}>
-                  {translateStatus(run.status, locale)}
-                </span>
-              </div>
-              <p>{translateRuntimeText(run.reason, locale)}</p>
-              <div className="timeline-list">
-                {run.timeline.slice(0, 4).map((item) => (
-                  <div
-                    key={`${run.id}-${item.at}-${item.label}`}
-                    className="timeline-item"
-                  >
-                    <span className="timeline-label">
-                      {translateTimelineLabel(item.label, locale)}
+        <section className="recent-section">
+          <div className="recent-section-head">
+            <p className="section-label">
+              {locale === "ko" ? "최근 실행" : "RECENT EXECUTIONS"}
+            </p>
+            <h2>
+              {locale === "ko" ? "방금 무슨 일이 일어났는가." : "What just happened."}
+            </h2>
+          </div>
+          <div className="timeline-grid">
+            {recentRuns.map((run) => (
+              <article key={run.id} className="timeline-card">
+                <div className="scenario-copy">
+                  <div>
+                    <h2
+                      style={{
+                        color:
+                          run.scenario === "success"
+                            ? "var(--teal)"
+                            : run.scenario === "timeout"
+                              ? "var(--orange)"
+                              : "var(--red)",
+                      }}
+                    >
+                      {translateScenario(run.scenario, locale) === "success"
+                        ? "Honest Trade"
+                        : translateScenario(run.scenario, locale) === "timeout"
+                          ? "Rugpull Defense"
+                          : translateScenario(run.scenario, locale) === "no escrow"
+                            ? "Without Escrow"
+                            : translateScenario(run.scenario, locale)}
+                    </h2>
+                    <span
+                      style={{
+                        fontSize: "0.8rem",
+                        color: "var(--ink-muted)",
+                        fontFamily: "var(--font-mono)",
+                      }}
+                    >
+                      {translateRoute(run.route, locale)}
                     </span>
-                    <strong>{translateRuntimeText(item.details, locale)}</strong>
-                    <p>{new Date(item.at).toLocaleTimeString(localeTime(locale))}</p>
                   </div>
-                ))}
-              </div>
-            </article>
-          ))}
+                  <span className={`status-pill status-${run.status}`}>
+                    {translateStatus(run.status, locale)}
+                  </span>
+                </div>
+                <p>{translateRuntimeText(run.reason, locale)}</p>
+                <div className="timeline-list">
+                  {run.timeline.slice(0, 4).map((item) => (
+                    <div
+                      key={`${run.id}-${item.at}-${item.label}`}
+                      className="timeline-item"
+                    >
+                      <p>{new Date(item.at).toLocaleTimeString(localeTime(locale))}</p>
+                      <strong>{translateRuntimeText(item.details, locale)}</strong>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
       )}
     </>

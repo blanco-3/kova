@@ -35,8 +35,22 @@ export function SplitView({
     <section className="comparison-shell">
       <div className="comparison-head">
         <p className="section-label">{copy.comparison.sectionLabel}</p>
-        <h2>{copy.comparison.title}</h2>
-        <p>{copy.comparison.description}</p>
+        <h2>
+          {locale === "ko" ? (
+            <>
+              같은 요청. <span className="accent">완전히 다른 결과.</span>
+            </>
+          ) : (
+            <>
+              Same request. <span className="accent">Two outcomes.</span>
+            </>
+          )}
+        </h2>
+        <p>
+          {locale === "ko"
+            ? "에스크로 레이어가 결제를 전달 검증 후에만 릴리즈하는 암호학적 보장을 만듭니다."
+            : "The escrow layer creates a cryptographic guarantee that payment only flows after delivery is verified."}
+        </p>
       </div>
 
       <div className="split-grid">
@@ -47,23 +61,60 @@ export function SplitView({
           >
             <div className="scenario-copy">
               <div>
-                <p className="section-label">{scenario.mode}</p>
-                <h2>{scenario.headline}</h2>
-                <p>{scenario.summary}</p>
+                <h2>{scenario.mode}</h2>
               </div>
+              <span
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.9rem",
+                  background:
+                    scenario.key === "without"
+                      ? "var(--red-dim)"
+                      : "var(--emerald-dim)",
+                  color:
+                    scenario.key === "without" ? "var(--red)" : "var(--emerald)",
+                  flexShrink: 0,
+                }}
+              >
+                {scenario.key === "without" ? "✗" : "✓"}
+              </span>
             </div>
 
             <div className="lane-list">
               {scenario.lanes.map((lane, index) => (
                 <div key={lane.label} className="lane-item">
-                  <div className="scenario-copy">
-                    <span className="lane-label">
-                      {copy.common.step} {index + 1}
+                  <strong>
+                    <span
+                      style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: "50%",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "0.7rem",
+                        fontWeight: 600,
+                        background:
+                          scenario.key === "without"
+                            ? "var(--red-dim)"
+                            : "var(--teal-dim)",
+                        color:
+                          scenario.key === "without" ? "var(--red)" : "var(--teal)",
+                        flexShrink: 0,
+                        fontFamily: "var(--font-mono)",
+                      }}
+                    >
+                      {index + 1}
                     </span>
+                    {lane.title}
                     <StatusBadge status={lane.status} locale={locale} />
-                  </div>
-                  <strong>{lane.title}</strong>
-                  <p>{lane.note}</p>
+                  </strong>
+                  <p style={{ paddingLeft: 36 }}>{lane.note}</p>
                 </div>
               ))}
             </div>

@@ -29,18 +29,20 @@ export function EscrowTracker({
     return (
       <section className="tracker-card">
         <div className="tracker-header">
-          <div>
-            <p className="section-label">{copy.tracker.sectionLabel}</p>
-            <h2>{copy.tracker.title}</h2>
-          </div>
+          <p className="section-label">{copy.tracker.sectionLabel}</p>
+          <h2>{copy.tracker.title}</h2>
         </div>
-        <div style={{ 
-          padding: "48px 24px", 
-          textAlign: "center", 
-          color: "var(--ink-muted)",
-          fontFamily: "var(--font-mono), monospace",
-          fontSize: "0.85rem"
-        }}>
+        <div
+          style={{
+            padding: "48px 24px",
+            textAlign: "center",
+            color: "var(--ink-muted)",
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.85rem",
+            border: "1px solid var(--glass-border)",
+            borderRadius: "16px",
+          }}
+        >
           {copy.tracker.empty}
         </div>
       </section>
@@ -50,13 +52,8 @@ export function EscrowTracker({
   return (
     <section className="tracker-card">
       <div className="tracker-header">
-        <div>
-          <p className="section-label">{copy.tracker.sectionLabel}</p>
-          <h2>{copy.tracker.title}</h2>
-        </div>
-        <p className="tracker-legend">
-          {copy.tracker.legend}
-        </p>
+        <p className="section-label">{copy.tracker.sectionLabel}</p>
+        <h2>{copy.tracker.title}</h2>
       </div>
       <table className="tracker-table">
         <thead>
@@ -71,10 +68,15 @@ export function EscrowTracker({
             <tr key={escrow.id}>
               <td>
                 <strong>{escrow.id}</strong>
-                <code>{escrow.lifecycle}</code>
               </td>
-              <td>{escrow.pair}</td>
-              <td>{escrow.amount}</td>
+              <td
+                style={{ color: "var(--ink-secondary)", fontSize: "0.9rem" }}
+              >
+                {escrow.pair}
+              </td>
+              <td style={{ fontWeight: 500, fontSize: "0.9rem" }}>
+                {escrow.amount}
+              </td>
               <td>
                 <code>{escrow.hash}</code>
               </td>
