@@ -71,9 +71,6 @@ export default function HomePage() {
             KO
           </button>
         </div>
-        <a href="#demo" className="nav-cta">
-          Live Demo
-        </a>
       </nav>
 
       <main className="page-shell">

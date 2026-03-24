@@ -147,26 +147,6 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
       <SplitView scenarios={scenarioCards} locale={locale} />
 
       <section className="demo-stage">
-        <div className="demo-stage-copy">
-          <p className="section-label">{copy.demo.sectionLabel}</p>
-          <h2>
-            {locale === "ko" ? (
-              <>
-                세 가지 시나리오. <span className="accent">하나의 질문.</span>
-              </>
-            ) : (
-              <>
-                Three scenarios. <span className="accent">One question.</span>
-              </>
-            )}
-          </h2>
-          <p>
-            {locale === "ko"
-              ? "전달이 실패했을 때 결제는 어떻게 되는가?"
-              : "What happens to the payment when delivery goes wrong?"}
-          </p>
-        </div>
-
         <div className="control-panel">
           <div className="control-actions">
             <label className="prompt-field">
@@ -213,17 +193,6 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
                   ? copy.demo.buttons.running
                   : `◎ ${copy.demo.buttons.noEscrow}`}
               </button>
-            </div>
-
-            <div className="control-grid">
-              <div className="control-meta">
-                <span>{copy.demo.apiEndpoint}</span>
-                <strong>{apiBase}</strong>
-              </div>
-              <div className="control-meta">
-                <span>{locale === "ko" ? "총 실행 수" : "TOTAL EXECUTIONS"}</span>
-                <strong>{runs.length}</strong>
-              </div>
             </div>
 
             {error && <p className="error-copy">{translateRuntimeText(error, locale)}</p>}
