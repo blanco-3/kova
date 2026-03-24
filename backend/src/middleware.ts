@@ -486,13 +486,14 @@ export function createMiddlewareApp(overrides: Partial<RuntimeConfig> = {}) {
     });
   });
 
-  app.get("/api/escrows", (_req, res) => {
+  app.get(["/escrows", "/api/escrows"], (_req, res) => {
     const list = [...runs.values()].sort((a, b) => b.startedAt.localeCompare(a.startedAt));
     res.json(list);
   });
 
-  app.get("/api/escrows/:id", (req, res) => {
-    const run = runs.get(req.params.id);
+  app.get(["/escrows/:id", "/api/escrows/:id"], (req, res) => {
+    const runId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const run = runId ? runs.get(runId) : undefined;
     if (!run) {
       return res.status(404).json({ error: "not_found" });
     }
@@ -500,7 +501,7 @@ export function createMiddlewareApp(overrides: Partial<RuntimeConfig> = {}) {
     return res.json(run);
   });
 
-  app.post("/api/demo/run", async (req, res) => {
+  app.post(["/demo/run", "/api/demo/run"], async (req, res) => {
     const parsed = runSchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({

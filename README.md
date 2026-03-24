@@ -208,13 +208,14 @@ Important:
 - the frontend needs a public middleware URL to run the live scenarios
 - the current local default `http://127.0.0.1:8787` only works for local development
 - Vercel is a good fit for the frontend, but the middleware/demo stack should run on an always-on Node service
+- the hosted public backend runs in a synchronous demo mode so judges can click through the scenarios without depending on the local dev stack
 
 Example production-style split:
 
 - `https://kova-henna.vercel.app` -> frontend
-- `https://x402-escrow-api.onrender.com` -> middleware API
-- `https://x402-honest.onrender.com` -> honest demo server
-- `https://x402-malicious.onrender.com` -> malicious demo server
+- `https://kova-backend.vercel.app` -> public demo backend
+- `https://kova-backend.vercel.app/api/demo/honest` -> honest demo endpoint
+- `https://kova-backend.vercel.app/api/demo/malicious` -> malicious demo endpoint
 
 ## Demo outcomes
 

@@ -16,9 +16,9 @@
 ## Demo links to finalize
 
 - Frontend URL: `https://kova-henna.vercel.app`
-- Middleware URL: `TODO`
-- Honest server URL: `TODO`
-- Malicious server URL: `TODO`
+- Middleware URL: `https://kova-backend.vercel.app`
+- Honest server URL: `https://kova-backend.vercel.app/api/demo/honest`
+- Malicious server URL: `https://kova-backend.vercel.app/api/demo/malicious`
 
 ## Deck
 

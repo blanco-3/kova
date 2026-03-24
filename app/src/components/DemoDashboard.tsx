@@ -30,6 +30,7 @@ import {
 
 const apiBase =
   process.env.NEXT_PUBLIC_DEMO_API_BASE ?? "http://127.0.0.1:8787";
+const localRunsKey = "x402-escrow-demo-runs";
 
 async function fetchRuns(): Promise<DemoRun[]> {
   const response = await fetch(`${apiBase}/api/escrows`, {
@@ -41,6 +42,38 @@ async function fetchRuns(): Promise<DemoRun[]> {
   }
 
   return response.json();
+}
+
+function mergeRuns(current: DemoRun[], incoming: DemoRun[]) {
+  const merged = new Map<string, DemoRun>();
+
+  for (const run of current) {
+    merged.set(run.id, run);
+  }
+
+  for (const run of incoming) {
+    merged.set(run.id, run);
+  }
+
+  return [...merged.values()].sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+}
+
+function readCachedRuns() {
+  if (typeof window === "undefined") {
+    return [] as DemoRun[];
+  }
+
+  try {
+    const raw = window.localStorage.getItem(localRunsKey);
+    if (!raw) {
+      return [] as DemoRun[];
+    }
+
+    const parsed = JSON.parse(raw) as DemoRun[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [] as DemoRun[];
+  }
 }
 
 export function DemoDashboard({ locale }: { locale: Locale }) {
@@ -55,7 +88,7 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
     try {
       const nextRuns = await fetchRuns();
       startTransition(() => {
-        setRuns(nextRuns);
+        setRuns((current) => mergeRuns(current, nextRuns));
         setError(null);
       });
     } catch (refreshError) {
@@ -70,6 +103,9 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
   });
 
   useEffect(() => {
+    startTransition(() => {
+      setRuns(readCachedRuns());
+    });
     void refreshRuns();
     const intervalId = setInterval(() => {
       void refreshRuns();
@@ -85,6 +121,14 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
     }
     previousLocale.current = locale;
   }, [locale, prompt]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(localRunsKey, JSON.stringify(runs.slice(0, 12)));
+  }, [runs]);
 
   async function runScenario(scenario: DemoScenario) {
     setBusyScenario(scenario);
@@ -106,6 +150,10 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
         );
       }
 
+      const run = (await response.json().catch(() => null)) as DemoRun | null;
+      if (run?.id) {
+        setRuns((current) => mergeRuns(current, [run]));
+      }
       await refreshRuns();
     } catch (runError) {
       setError(

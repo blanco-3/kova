@@ -1,26 +1,29 @@
 {
-  "name": "x402-escrow-middleware",
+  "name": "x402-escrow-backend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/server.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.30.1",
+    "@solana/kit": "6.5.0",
     "@solana/spl-token": "0.4.14",
     "@solana/web3.js": "1.98.4",
+    "@x402/core": "2.8.0",
+    "@x402/express": "2.8.0",
     "@x402/fetch": "2.8.0",
     "@x402/svm": "2.8.0",
     "cors": "2.8.5",
     "dotenv": "17.2.3",
     "express": "^5.1.0",
+    "serverless-http": "^3.2.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.4",
-    "tsx": "^4.20.6",
+    "@types/node": "^24.7.2",
     "typescript": "5.9.3"
   }
 }
