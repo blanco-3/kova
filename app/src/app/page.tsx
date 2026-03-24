@@ -1,40 +1,30 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { DemoDashboard } from "../components/DemoDashboard";
 import { VaultVisual } from "../components/VaultVisual";
 import { getUiCopy, type Locale } from "../lib/i18n";
 
-type BrowserApi = typeof globalThis & {
-  localStorage?: {
-    getItem(key: string): string | null;
-    setItem(key: string, value: string): void;
-  };
-  navigator?: {
-    language?: string;
-  };
-};
-
-const browserApi = globalThis as BrowserApi;
+const DemoDashboard = dynamic(
+  () => import("../components/DemoDashboard").then((m) => ({ default: m.DemoDashboard })),
+  { ssr: false }
+);
 
 export default function HomePage() {
-  const [locale, setLocale] = useState<Locale>("en");
+  // Default to Korean (primary audience). Only switch to English if user explicitly saved it.
+  const [locale, setLocale] = useState<Locale>("ko");
   const copy = getUiCopy(locale);
 
   useEffect(() => {
-    const savedLocale = browserApi.localStorage?.getItem("x402-locale");
+    const savedLocale = localStorage.getItem("x402-locale");
     if (savedLocale === "en" || savedLocale === "ko") {
       setLocale(savedLocale);
-      return;
-    }
-    if (browserApi.navigator?.language?.toLowerCase().startsWith("ko")) {
-      setLocale("ko");
     }
   }, []);
 
   function updateLocale(nextLocale: Locale) {
     setLocale(nextLocale);
-    browserApi.localStorage?.setItem("x402-locale", nextLocale);
+    localStorage.setItem("x402-locale", nextLocale);
   }
 
   return (
