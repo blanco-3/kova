@@ -9,6 +9,8 @@ target
 *.log
 .env
 .env.local
+.env.*
+!.env.example
 *.tsbuildinfo
 
 .vercel

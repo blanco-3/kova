@@ -12,6 +12,7 @@ import { z } from "zod";
 import { EscrowClient } from "./escrow-client";
 import { sha256Bytes, sha256Hex } from "./hash-utils";
 import { readSecretKeyBytes } from "./keypair";
+import { getRunStore } from "./run-store";
 import type { DemoRun, DemoScenario, DemoStatus } from "./types";
 
 interface RuntimeConfig {
@@ -96,6 +97,7 @@ const escrowClient = new EscrowClient({
 });
 
 const runs = new Map<string, DemoRun>();
+const runStore = getRunStore(runs);
 const amountAtomic = Math.round(config.amountUsdc * 1_000_000);
 
 function clusterLabel(rpc: string): string {
@@ -125,7 +127,7 @@ function routeLabel(scenario: DemoScenario): string {
   }
 }
 
-function createRun(scenario: DemoScenario, prompt: string): DemoRun {
+async function createRun(scenario: DemoScenario, prompt: string): Promise<DemoRun> {
   const id = `run-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
   const run: DemoRun = {
     id,
@@ -142,19 +144,22 @@ function createRun(scenario: DemoScenario, prompt: string): DemoRun {
   };
 
   runs.set(id, run);
+  await runStore.save(run);
   return run;
 }
 
-function updateRun(runId: string, updates: Partial<DemoRun>) {
+async function updateRun(runId: string, updates: Partial<DemoRun>) {
   const current = runs.get(runId);
   if (!current) {
     return;
   }
 
-  runs.set(runId, { ...current, ...updates });
+  const nextRun = { ...current, ...updates };
+  runs.set(runId, nextRun);
+  await runStore.save(nextRun);
 }
 
-function pushTimeline(
+async function pushTimeline(
   runId: string,
   label: DemoRun["timeline"][number]["label"],
   status: DemoStatus,
@@ -165,7 +170,7 @@ function pushTimeline(
     return;
   }
 
-  runs.set(runId, {
+  const nextRun = {
     ...current,
     timeline: [
       ...current.timeline,
@@ -176,7 +181,10 @@ function pushTimeline(
         at: nowIso(),
       },
     ],
-  });
+  };
+
+  runs.set(runId, nextRun);
+  await runStore.save(nextRun);
 }
 
 async function loadBuyerSigner() {
@@ -209,7 +217,12 @@ async function runSuccessScenario(
   run: DemoRun,
   endpoints: { honestServerUrl: string }
 ) {
-  pushTimeline(run.id, "402 issued", "created", "Honest server returned x402 payment instructions");
+  await pushTimeline(
+    run.id,
+    "402 issued",
+    "created",
+    "Honest server returned x402 payment instructions"
+  );
   if (!config.simulatePublicDemo) {
     await raw402Request(`${endpoints.honestServerUrl}/direct`, run.prompt);
   }
@@ -222,13 +235,13 @@ async function runSuccessScenario(
     verifyDeadline,
   });
 
-  updateRun(run.id, {
+  await updateRun(run.id, {
     status: "created",
     reason: "Escrow funded and waiting on service delivery",
     escrowPda: created.escrowPda.toBase58(),
     txSignatures: [created.signature],
   });
-  pushTimeline(
+  await pushTimeline(
     run.id,
     "escrow created",
     "created",
@@ -258,18 +271,18 @@ async function runSuccessScenario(
     created.escrowPda,
     sha256Bytes(result)
   );
-  updateRun(run.id, {
+  await updateRun(run.id, {
     status: "hash_committed",
     resultHash,
     txSignatures: [...(runs.get(run.id)?.txSignatures ?? []), commitSignature],
   });
-  pushTimeline(
+  await pushTimeline(
     run.id,
     "hash committed",
     "hash_committed",
     `Seller committed ${resultHash}`
   );
-  pushTimeline(
+  await pushTimeline(
     run.id,
     "result delivered",
     "hash_committed",
@@ -283,14 +296,14 @@ async function runSuccessScenario(
     Buffer.from(result)
   );
 
-  updateRun(run.id, {
+  await updateRun(run.id, {
     status: "completed",
     reason: "Matching result hash released escrow to the seller",
     resultPreview: result,
     completedAt: nowIso(),
     txSignatures: [...(runs.get(run.id)?.txSignatures ?? []), releaseSignature],
   });
-  pushTimeline(
+  await pushTimeline(
     run.id,
     "released",
     "completed",
@@ -302,7 +315,7 @@ async function runTimeoutScenario(
   run: DemoRun,
   endpoints: { maliciousServerUrl: string }
 ) {
-  pushTimeline(
+  await pushTimeline(
     run.id,
     "402 issued",
     "created",
@@ -320,13 +333,13 @@ async function runTimeoutScenario(
     verifyDeadline,
   });
 
-  updateRun(run.id, {
+  await updateRun(run.id, {
     status: "created",
     reason: "Escrow funded and waiting for a result that never arrives",
     escrowPda: created.escrowPda.toBase58(),
     txSignatures: [created.signature],
   });
-  pushTimeline(
+  await pushTimeline(
     run.id,
     "escrow created",
     "created",
@@ -362,13 +375,13 @@ async function runTimeoutScenario(
     created.sellerAta
   );
 
-  updateRun(run.id, {
+  await updateRun(run.id, {
     status: "refunded",
     reason: "Seller never committed a result hash before submit deadline",
     completedAt: nowIso(),
     txSignatures: [...(runs.get(run.id)?.txSignatures ?? []), refundSignature],
   });
-  pushTimeline(
+  await pushTimeline(
     run.id,
     "refunded",
     "refunded",
@@ -380,7 +393,7 @@ async function runNoEscrowScenario(
   run: DemoRun,
   endpoints: { maliciousServerUrl: string }
 ) {
-  pushTimeline(
+  await pushTimeline(
     run.id,
     "402 issued",
     "created",
@@ -418,12 +431,12 @@ async function runNoEscrowScenario(
     await new Promise((resolve) => setTimeout(resolve, 1_000));
   }
 
-  updateRun(run.id, {
+  await updateRun(run.id, {
     status: "lost",
     reason: "Direct x402 payment succeeded, but the server never delivered the service result",
     completedAt: nowIso(),
   });
-  pushTimeline(
+  await pushTimeline(
     run.id,
     "lost",
     "lost",
@@ -448,12 +461,12 @@ async function executeRun(
 
     await runNoEscrowScenario(run, { maliciousServerUrl: endpoints.maliciousServerUrl });
   } catch (error) {
-    updateRun(run.id, {
+    await updateRun(run.id, {
       status: run.scenario === "no_escrow" ? "lost" : "disputed",
       reason: error instanceof Error ? error.message : "Unknown execution error",
       completedAt: nowIso(),
     });
-    pushTimeline(
+    await pushTimeline(
       run.id,
       run.scenario === "no_escrow" ? "lost" : "disputed",
       run.scenario === "no_escrow" ? "lost" : "disputed",
@@ -469,11 +482,12 @@ export function getHealthSummary() {
     honestServerUrl: config.honestServerUrl ?? "derived-per-request",
     maliciousServerUrl: config.maliciousServerUrl ?? "derived-per-request",
     simulatePublicDemo: config.simulatePublicDemo,
+    runStore: runStore.kind,
   };
 }
 
-export function listRuns() {
-  return [...runs.values()].sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+export async function listRuns() {
+  return runStore.list();
 }
 
 export async function executeScenario(
@@ -486,7 +500,7 @@ export async function executeScenario(
     simulatePublicDemo: config.simulatePublicDemo,
     baseUrl,
   });
-  const run = createRun(scenario, prompt);
+  const run = await createRun(scenario, prompt);
   const endpoints = {
     honestServerUrl:
       config.honestServerUrl ?? `${baseUrl ?? "http://127.0.0.1:8787"}/api/demo/honest`,
@@ -500,5 +514,5 @@ export async function executeScenario(
     runId: run.id,
     status: runs.get(run.id)?.status,
   });
-  return runs.get(run.id) ?? run;
+  return (await runStore.get(run.id)) ?? runs.get(run.id) ?? run;
 }

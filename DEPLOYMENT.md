@@ -3,15 +3,14 @@
 ## Recommended deployment shape
 
 - frontend: Vercel
-- middleware: Render / Fly.io / Railway / VPS
-- honest demo server: same Node host or separate service
-- malicious demo server: same Node host or separate service
+- public demo backend: Vercel serverless + Upstash Redis / Vercel KV for run persistence
+- full local dev stack: local Express services for honest + delivery-failure endpoints
 
 ## Why this split
 
 The frontend is a standard Next.js app and fits Vercel well.
 
-The middleware and demo servers are long-running Node services that keep in-memory state for the demo flow, so they should run on an always-on host instead of a purely serverless environment.
+The judge-facing backend can also run on Vercel now, as long as demo runs are persisted in Redis/KV instead of process memory.
 
 ## Frontend on Vercel
 
@@ -45,6 +44,10 @@ The deployed frontend should point at the public middleware URL and will run the
 - `FACILITATOR_URL`
 - `MIDDLEWARE_PORT`
 - `DIRECT_X402_PRICE_USD`
+- `KV_REST_API_URL` or `UPSTASH_REDIS_REST_URL`
+- `KV_REST_API_TOKEN` or `UPSTASH_REDIS_REST_TOKEN`
+- `RUN_STORE_PREFIX` (optional)
+- `RUN_STORE_MAX` (optional)
 
 ### Services to run
 
@@ -54,18 +57,20 @@ The deployed frontend should point at the public middleware URL and will run the
 
 ## Simplest demo deployment
 
-For a hackathon demo, the easiest stable setup is:
+For the current hackathon demo, the stable setup is:
 
-1. deploy frontend to Vercel
-2. deploy middleware to one always-on Node service
-3. deploy honest and malicious endpoints as two additional always-on Node services
-4. update `NEXT_PUBLIC_DEMO_API_BASE` in Vercel
-5. test all three demo buttons end to end
+1. deploy the frontend to Vercel
+2. deploy the public backend to Vercel
+3. attach Upstash Redis / Vercel KV to the backend project
+4. confirm `/api/health` reports `"runStore": "redis"`
+5. update `NEXT_PUBLIC_DEMO_API_BASE` in Vercel
+6. test all three demo buttons end to end
 
 ## Pre-launch checklist
 
 - frontend loads without local dependencies
-- middleware `/health` returns `ok: true`
+- backend `/api/health` returns `ok: true`
+- backend `/api/health` reports `"runStore": "redis"`
 - honest server `/health` returns `ok: true`
 - malicious server `/health` returns `ok: true`
 - `Honest Trade` completes

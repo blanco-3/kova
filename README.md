@@ -161,6 +161,8 @@ Copy `.env.example` and set:
 - `MALICIOUS_SERVER_URL`
 - `FACILITATOR_URL`
 - `NEXT_PUBLIC_DEMO_API_BASE`
+- `KV_REST_API_URL` or `UPSTASH_REDIS_REST_URL` for a serverless public backend
+- `KV_REST_API_TOKEN` or `UPSTASH_REDIS_REST_TOKEN` for a serverless public backend
 
 The public facilitator used by the demo is `https://www.x402.org/facilitator`.
 
@@ -194,7 +196,7 @@ The frontend is a standalone Next.js app under `app/`.
 Recommended judge-facing deployment:
 
 - frontend: Vercel
-- middleware + demo servers: an always-on Node host such as Render, Fly.io, Railway, or a VPS
+- public demo backend: Vercel serverless with Upstash Redis / Vercel KV for run persistence
 
 To deploy the frontend on Vercel:
 
@@ -207,8 +209,8 @@ Important:
 
 - the frontend needs a public middleware URL to run the live scenarios
 - the current local default `http://127.0.0.1:8787` only works for local development
-- Vercel is a good fit for the frontend, but the middleware/demo stack should run on an always-on Node service
 - the hosted public backend runs in a synchronous demo mode so judges can click through the scenarios without depending on the local dev stack
+- if the backend is deployed on Vercel, persistent run history requires Redis/KV env vars so `/api/escrows` survives across serverless invocations
 
 Example production-style split:
 
@@ -256,6 +258,15 @@ Validated on `2026-03-24` with the real devnet program and live x402 middleware 
   - refund: `5aSNGeAHFo7auMVGDVmTBT2WxbTmhqhYhgaLf3m8KKDQU8dx89cNzDRBqS92Q8ogG9phkxJPKC5X58dGzrCNwsRt`
 
 The `no_escrow` path was also validated through the middleware run registry and surfaces the direct-loss state in the UI.
+
+## Public backend persistence
+
+The judge-facing backend stores demo runs in Redis when any of the following env pairs are present:
+
+- `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
+- `KV_REST_API_URL` + `KV_REST_API_TOKEN`
+
+Without one of those pairs, the backend falls back to in-memory storage and `/api/escrows` will not persist across serverless invocations.
 
 ## Submission assets
 
