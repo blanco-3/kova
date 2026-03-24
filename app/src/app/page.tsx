@@ -1,14 +1,9 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { DemoDashboard } from "../components/DemoDashboard";
 import { VaultVisual } from "../components/VaultVisual";
 import { getUiCopy, type Locale } from "../lib/i18n";
-
-const DemoDashboard = dynamic(
-  () => import("../components/DemoDashboard").then((m) => ({ default: m.DemoDashboard })),
-  { ssr: false }
-);
 
 export default function HomePage() {
   // Default to Korean (primary audience). Only switch to English if user explicitly saved it.

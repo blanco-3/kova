@@ -77,6 +77,10 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 /* ================================================
    NAVIGATION BAR — Floating pill, centered
    ================================================ */
@@ -748,15 +752,11 @@ html, body {
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: transform 0.25s, box-shadow 0.25s, opacity 0.25s, background-color 0.25s, color 0.25s, border-color 0.25s;
+  transition: box-shadow 0.25s, opacity 0.25s, background-color 0.25s, color 0.25s, border-color 0.25s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-}
-
-.demo-button:not(:disabled):hover {
-  transform: translateY(-1px);
 }
 
 .demo-button:disabled {
@@ -1026,14 +1026,14 @@ html, body {
   background: var(--bg-card);
   border: 1px solid var(--glass-border);
   box-shadow: none;
-  transition: transform 0.25s, border-color 0.25s;
+  transition: border-color 0.25s, box-shadow 0.25s;
   min-height: 100%;
   overflow: hidden;
 }
 
 .timeline-card:hover {
-  transform: translateY(-2px);
   border-color: var(--glass-border-strong);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .timeline-card-success {
