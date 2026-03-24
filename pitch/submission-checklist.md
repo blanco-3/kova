@@ -15,7 +15,7 @@
 
 ## Demo links to finalize
 
-- Frontend URL: `https://kova-henna.vercel.app`
+- Frontend URL: `https://kova-frontend-s6dwdvbzwa-du.a.run.app`
 - Backend URL: `https://kova-backend-s6dwdvbzwa-du.a.run.app`
 - Honest server URL: `https://kova-backend-s6dwdvbzwa-du.a.run.app/api/demo/honest`
 - Malicious server URL: `https://kova-backend-s6dwdvbzwa-du.a.run.app/api/demo/malicious`

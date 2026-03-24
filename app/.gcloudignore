@@ -1,0 +1,11 @@
+.git
+.gitignore
+.gcloudignore
+.env
+.env.*
+.next
+.vercel
+node_modules
+*.log
+coverage
+tsconfig.tsbuildinfo

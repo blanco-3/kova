@@ -197,7 +197,7 @@ The frontend is a standalone Next.js app under `app/`.
 
 Recommended judge-facing deployment:
 
-- frontend: Vercel
+- frontend: GCP Cloud Run
 - public demo backend: GCP Cloud Run with Firestore-backed run persistence
 
 To deploy the backend on GCP:
@@ -213,12 +213,13 @@ The deploy script enables the required services, creates Firestore if needed, co
 - `/api/demo/honest`
 - `/api/demo/malicious`
 
-To deploy the frontend on Vercel:
+To deploy the frontend on GCP:
 
-1. import this repository into Vercel
-2. set the project root directory to `app`
-3. set `NEXT_PUBLIC_DEMO_API_BASE` to the public middleware URL
-4. deploy as a standard Next.js app
+```bash
+NEXT_PUBLIC_DEMO_API_BASE=https://kova-backend-s6dwdvbzwa-du.a.run.app npm run gcp:frontend:deploy
+```
+
+The frontend deploy script pushes the `app/` Next.js project to a Cloud Run service named `kova-frontend` and injects `NEXT_PUBLIC_DEMO_API_BASE` into both build-time and runtime env.
 
 Important:
 
@@ -229,7 +230,7 @@ Important:
 
 Example production-style split:
 
-- `https://kova-henna.vercel.app` -> frontend
+- `https://kova-frontend-s6dwdvbzwa-du.a.run.app` -> frontend
 - `https://kova-backend-s6dwdvbzwa-du.a.run.app` -> public demo backend
 - `https://kova-backend-s6dwdvbzwa-du.a.run.app/api/demo/honest` -> honest demo endpoint
 - `https://kova-backend-s6dwdvbzwa-du.a.run.app/api/demo/malicious` -> malicious demo endpoint
@@ -276,14 +277,11 @@ The `no_escrow` path was also validated through the middleware run registry and 
 
 ## Public backend persistence
 
-The judge-facing backend stores demo runs in Vercel Blob when `BLOB_READ_WRITE_TOKEN` is present.
+The judge-facing backend stores demo runs in Firestore when `RUN_STORE_BACKEND=firestore`.
 
-If Blob is unavailable, it falls back to Redis when either of the following env pairs are present:
+This is the recommended production-style path for the public demo because it keeps run history stable across requests and does not depend on Vercel or Redis quotas.
 
-- `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
-- `KV_REST_API_URL` + `KV_REST_API_TOKEN`
-
-Without Blob or Redis, the backend falls back to in-memory storage and `/api/escrows` will not persist across serverless invocations.
+The backend still supports Blob, Redis, or in-memory storage as fallbacks, but the deployed GCP stack now uses Firestore by default.
 
 ## Submission assets
 
