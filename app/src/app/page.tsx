@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DemoDashboard } from "../components/DemoDashboard";
-import { EscrowVaultHero } from "../components/EscrowVaultHero";
+import { VaultVisual } from "../components/VaultVisual";
 import { getUiCopy, type Locale } from "../lib/i18n";
 
 type BrowserApi = typeof globalThis & {
@@ -27,7 +27,6 @@ export default function HomePage() {
       setLocale(savedLocale);
       return;
     }
-
     if (browserApi.navigator?.language?.toLowerCase().startsWith("ko")) {
       setLocale("ko");
     }
@@ -39,64 +38,106 @@ export default function HomePage() {
   }
 
   return (
-    <main className="page-shell">
-      <div className="page-toolbar">
-        <span>{copy.hero.language}</span>
-        <div className="locale-switch" role="tablist" aria-label={copy.hero.language}>
+    <>
+      <nav className="nav-bar">
+        <span className="nav-logo">Kova</span>
+        <a href="#vault" className="nav-link">
+          Protocol
+        </a>
+        <a href="#demo" className="nav-link">
+          Demo
+        </a>
+        <a
+          href="https://github.com/blanco-3/kova"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="nav-link"
+        >
+          GitHub ↗
+        </a>
+        <div className="nav-locale">
           <button
-            className={locale === "en" ? "locale-button active" : "locale-button"}
+            className={locale === "en" ? "locale-btn active" : "locale-btn"}
             onClick={() => updateLocale("en")}
             type="button"
           >
-            {copy.common.english}
+            EN
           </button>
           <button
-            className={locale === "ko" ? "locale-button active" : "locale-button"}
+            className={locale === "ko" ? "locale-btn active" : "locale-btn"}
             onClick={() => updateLocale("ko")}
             type="button"
           >
-            {copy.common.korean}
+            KO
           </button>
         </div>
-      </div>
-      <section className="hero">
-        <div className="hero-copy">
-          <p className="eyebrow">{copy.hero.eyebrow}</p>
-          <h1>{copy.hero.headline}</h1>
-          <p className="hero-text">{copy.hero.summary}</p>
-          <div className="hero-ribbon">
-            {copy.hero.ribbons.map((ribbon) => (
-              <span key={ribbon}>{ribbon}</span>
-            ))}
-          </div>
-        </div>
+        <a href="#demo" className="nav-cta">
+          Live Demo
+        </a>
+      </nav>
 
-        <EscrowVaultHero locale={locale} />
-
-        <div className="hero-stage">
-          <article className="signal-card signal-risk">
-            <span className="hero-label">{copy.hero.riskLabel}</span>
-            <strong>{copy.hero.riskHeadline}</strong>
-            <p>{copy.hero.riskBody}</p>
-          </article>
-          <article className="signal-card signal-safe">
-            <span className="hero-label">{copy.hero.safeLabel}</span>
-            <strong>{copy.hero.safeHeadline}</strong>
-            <p>{copy.hero.safeBody}</p>
-          </article>
-        </div>
-
-        <div className="hero-stats">
-          {copy.hero.stats.map((stat) => (
-            <div key={stat.label}>
-              <span>{stat.label}</span>
-              <strong>{stat.value}</strong>
+      <main className="page-shell">
+        <section className="hero">
+          <div className="hero-copy">
+            <p className="eyebrow">{copy.hero.eyebrow}</p>
+            <h1>
+              {locale === "ko" ? (
+                <>
+                  결제는 <span className="accent">전달보다 먼저</span> 이뤄지면 안
+                  됩니다.
+                </>
+              ) : (
+                <>
+                  Payment should <span className="accent">follow delivery,</span>{" "}
+                  not precede it.
+                </>
+              )}
+            </h1>
+            <p className="hero-text">{copy.hero.summary}</p>
+            <div className="hero-ribbon">
+              {copy.hero.ribbons.map((ribbon) => (
+                <span key={ribbon}>{ribbon}</span>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
+            <div className="hero-cta-row">
+              <a href="#demo" className="btn-primary">
+                {locale === "ko" ? "라이브 데모" : "Try Live Demo"} →
+              </a>
+              <a
+                href="https://github.com/blanco-3/kova"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-ghost"
+              >
+                {locale === "ko" ? "GitHub 보기" : "View on GitHub"} ↗
+              </a>
+            </div>
+          </div>
+        </section>
 
-      <DemoDashboard locale={locale} />
-    </main>
+        <section id="vault">
+          <VaultVisual locale={locale} />
+        </section>
+
+        <div id="demo">
+          <DemoDashboard locale={locale} />
+        </div>
+
+        <footer className="page-footer">
+          <span className="footer-logo">Kova</span>
+          <span className="footer-center">
+            Trust layer for the agent economy · Seoulana WarmUp Demo
+          </span>
+          <a
+            href="https://github.com/blanco-3/kova"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-link"
+          >
+            GitHub ↗
+          </a>
+        </footer>
+      </main>
+    </>
   );
 }
