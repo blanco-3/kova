@@ -1,0 +1,13 @@
+.anchor
+.ledger
+.next
+target
+coverage
+dist
+node_modules
+*.log
+.env
+.env.local
+app/.next
+app/node_modules
+middleware/node_modules

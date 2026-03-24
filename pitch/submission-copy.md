@@ -30,7 +30,7 @@ This project adds the missing trust layer for agent commerce. x402 can transport
 
 ## Live demo URL
 
-`TODO`
+`https://kova-henna.vercel.app`
 
 ## Pitch deck URL
 

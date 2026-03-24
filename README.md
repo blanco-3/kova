@@ -211,7 +211,7 @@ Important:
 
 Example production-style split:
 
-- `https://x402-escrow.vercel.app` -> frontend
+- `https://kova-henna.vercel.app` -> frontend
 - `https://x402-escrow-api.onrender.com` -> middleware API
 - `https://x402-honest.onrender.com` -> honest demo server
 - `https://x402-malicious.onrender.com` -> malicious demo server

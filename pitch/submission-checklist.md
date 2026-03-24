@@ -15,7 +15,7 @@
 
 ## Demo links to finalize
 
-- Frontend URL: `TODO`
+- Frontend URL: `https://kova-henna.vercel.app`
 - Middleware URL: `TODO`
 - Honest server URL: `TODO`
 - Malicious server URL: `TODO`
