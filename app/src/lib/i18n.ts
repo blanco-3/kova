@@ -66,13 +66,13 @@ const COPY = {
       checklist: [
         "Start with direct payment baseline",
         "Run the escrowed honest trade",
-        "Trigger the rugpull defense",
+        "Trigger the delivery failure protection flow",
       ],
       prompt: "Prompt",
       promptPlaceholder: "Enter a test prompt for the demo...",
       buttons: {
         success: "Honest Trade",
-        timeout: "Rugpull Defense",
+        timeout: "Delivery Failure Protection",
         noEscrow: "Without Escrow",
         running: "Running...",
       },
@@ -162,13 +162,13 @@ const COPY = {
       checklist: [
         "직접 결제 베이스라인부터 시작",
         "에스크로를 거친 정상 거래 실행",
-        "먹튀 방어 시나리오 실행",
+        "전달 실패 보호 시나리오 실행",
       ],
       prompt: "프롬프트",
       promptPlaceholder: "데모에 사용할 테스트 프롬프트를 입력하세요...",
       buttons: {
         success: "정상 거래",
-        timeout: "먹튀 방어",
+        timeout: "전달 실패 보호",
         noEscrow: "에스크로 없음",
         running: "실행 중...",
       },
@@ -234,13 +234,13 @@ const STATUS_LABELS: Record<Locale, Record<StatusKey, string>> = {
 
 const SCENARIO_LABELS: Record<Locale, Record<ScenarioKey, string>> = {
   en: {
-    success: "success",
-    timeout: "timeout",
-    no_escrow: "no escrow",
+    success: "Honest Trade",
+    timeout: "Delivery Failure Protection",
+    no_escrow: "Without Escrow",
   },
   ko: {
     success: "정상 거래",
-    timeout: "먹튀 방어",
+    timeout: "전달 실패 보호",
     no_escrow: "에스크로 없음",
   },
 };

@@ -728,40 +728,6 @@ html, body {
   gap: 24px;
 }
 
-.prompt-field {
-  display: grid;
-  gap: 10px;
-}
-
-.prompt-field .section-label {
-  color: var(--ink-muted);
-  margin-bottom: 0;
-  font-size: 0.68rem;
-}
-
-.prompt-input {
-  width: 100%;
-  padding: 16px 18px;
-  border-radius: 14px;
-  border: 1px solid var(--glass-border);
-  background: var(--bg-deep);
-  color: var(--ink-primary);
-  font: inherit;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  resize: vertical;
-  transition: border-color 0.2s;
-}
-
-.prompt-input::placeholder {
-  color: var(--ink-muted);
-}
-
-.prompt-input:focus {
-  outline: none;
-  border-color: var(--teal);
-}
-
 .button-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -803,7 +769,7 @@ html, body {
   box-shadow: 0 4px 24px var(--teal-glow);
 }
 
-/* Rugpull Defense — red */
+/* Delivery Failure Protection — red */
 .danger-button {
   background: var(--red);
   color: #fff;

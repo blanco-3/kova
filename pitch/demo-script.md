@@ -19,7 +19,7 @@ Show the `Without Escrow` path:
 
 “Now the same request with x402 Escrow Protocol.”
 
-Show the `Rugpull Defense` path:
+Show the `Delivery Failure Protection` path:
 
 - `402 issued`
 - `escrow created`
@@ -51,4 +51,3 @@ Close with:
 - show the program status transitions on the tracker
 - point out the real x402 402 challenge on the protected direct route
 - explain why `reject_result` is a v1 dispute path and not quality arbitration
-

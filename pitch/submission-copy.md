@@ -17,7 +17,7 @@ x402 enabled HTTP-native payments for AI agents, but it did not solve the trust 
 The live demo shows three outcomes:
 
 - `Without Escrow`: direct x402 payment succeeds but the service never arrives
-- `Rugpull Defense`: funds are escrowed and refunded when the seller does not deliver
+- `Delivery Failure Protection`: funds are escrowed and refunded when the seller does not deliver
 - `Honest Trade`: the seller commits the result hash and receives payment only after verification
 
 ## Why it matters

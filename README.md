@@ -222,7 +222,7 @@ Example production-style split:
 The dashboard is optimized around exactly three judge-facing scenarios:
 
 1. `Honest Trade`
-2. `Rugpull Defense`
+2. `Delivery Failure Protection`
 3. `Without Escrow`
 
 The UI shows:

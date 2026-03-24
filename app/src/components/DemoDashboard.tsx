@@ -4,7 +4,6 @@ import {
   startTransition,
   useEffect,
   useEffectEvent,
-  useRef,
   useState,
 } from "react";
 import { EscrowTracker } from "./EscrowTracker";
@@ -62,10 +61,9 @@ function readCachedRuns() {
 export function DemoDashboard({ locale }: { locale: Locale }) {
   const copy = getUiCopy(locale);
   const [runs, setRuns] = useState<DemoRun[]>([]);
-  const [prompt, setPrompt] = useState(getDefaultPrompt(locale));
   const [busyScenario, setBusyScenario] = useState<DemoScenario | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const previousLocale = useRef(locale);
+  const prompt = getDefaultPrompt(locale);
 
   const refreshRuns = useEffectEvent(async () => {
     try {
@@ -95,14 +93,6 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
     }, 2_000);
     return () => clearInterval(intervalId);
   }, [refreshRuns]);
-
-  useEffect(() => {
-    const previousDefault = getDefaultPrompt(previousLocale.current);
-    if (prompt === previousDefault || prompt === getDefaultPrompt(locale)) {
-      setPrompt(getDefaultPrompt(locale));
-    }
-    previousLocale.current = locale;
-  }, [locale, prompt]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -149,19 +139,6 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
       <section className="demo-stage">
         <div className="control-panel">
           <div className="control-actions">
-            <label className="prompt-field">
-              <span className="section-label">
-                {locale === "ko" ? "태스크 프롬프트" : "TASK PROMPT"}
-              </span>
-              <textarea
-                className="prompt-input"
-                value={prompt}
-                onChange={(event) => setPrompt(event.target.value)}
-                rows={2}
-                placeholder={copy.demo.promptPlaceholder}
-              />
-            </label>
-
             <div className="button-row">
               <button
                 className="demo-button"
@@ -227,13 +204,11 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
                               : "var(--red)",
                       }}
                     >
-                      {translateScenario(run.scenario, locale) === "success"
-                        ? "Honest Trade"
-                        : translateScenario(run.scenario, locale) === "timeout"
-                          ? "Rugpull Defense"
-                          : translateScenario(run.scenario, locale) === "no escrow"
-                            ? "Without Escrow"
-                            : translateScenario(run.scenario, locale)}
+                      {run.scenario === "success"
+                        ? translateScenario("success", locale)
+                        : run.scenario === "timeout"
+                          ? translateScenario("timeout", locale)
+                          : translateScenario("no_escrow", locale)}
                     </h2>
                     <span
                       style={{

@@ -32,7 +32,7 @@
 - Use `pitch/demo-script.md`
 - Show exactly three scenarios:
   - `Without Escrow`
-  - `Rugpull Defense`
+  - `Delivery Failure Protection`
   - `Honest Trade`
 
 ## Demo proof points to show
