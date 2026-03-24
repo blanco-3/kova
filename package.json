@@ -17,6 +17,7 @@
     "localnet:start": "bash scripts/localnet-start.sh",
     "devnet:deploy": "bash scripts/devnet-deploy.sh",
     "devnet:smoke": "tsx scripts/devnet-smoke.ts",
+    "gcp:backend:deploy": "bash scripts/cloudrun-deploy-backend.sh",
     "demo:honest": "tsx demo-servers/honest-server.ts",
     "demo:malicious": "tsx demo-servers/malicious-server.ts"
   },

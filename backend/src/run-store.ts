@@ -1,3 +1,5 @@
+import { Firestore } from "@google-cloud/firestore";
+import { del, list, put } from "@vercel/blob";
 import { Redis } from "@upstash/redis";
 import type { DemoRun } from "./types";
 
@@ -6,7 +8,7 @@ function envValue(name: string) {
   return value?.trim() ? value.trim() : undefined;
 }
 
-export type RunStoreKind = "memory" | "redis";
+export type RunStoreKind = "memory" | "redis" | "blob" | "firestore";
 
 export interface RunStore {
   readonly kind: RunStoreKind;
@@ -32,6 +34,155 @@ class MemoryRunStore implements RunStore {
     return [...this.runs.values()]
       .sort((left, right) => right.startedAt.localeCompare(left.startedAt))
       .slice(0, limit);
+  }
+}
+
+class FirestoreRunStore implements RunStore {
+  readonly kind = "firestore" as const;
+  private readonly collection;
+
+  constructor(config: {
+    projectId: string;
+    collectionName: string;
+    databaseId?: string;
+  }) {
+    const firestore = new Firestore({
+      projectId: config.projectId,
+      databaseId: config.databaseId,
+      ignoreUndefinedProperties: true,
+    });
+    this.collection = firestore.collection(config.collectionName);
+  }
+
+  async save(run: DemoRun) {
+    await this.collection.doc(run.id).set({
+      ...run,
+      startedAtEpoch: Date.parse(run.startedAt),
+    });
+  }
+
+  async get(id: string) {
+    const snapshot = await this.collection.doc(id).get();
+    if (!snapshot.exists) {
+      return null;
+    }
+
+    const data = snapshot.data() as (DemoRun & { startedAtEpoch?: number }) | undefined;
+    if (!data?.id) {
+      return null;
+    }
+
+    const { startedAtEpoch: _ignored, ...run } = data;
+    return run;
+  }
+
+  async list(limit = 50) {
+    const snapshot = await this.collection
+      .orderBy("startedAtEpoch", "desc")
+      .limit(limit)
+      .get();
+
+    return snapshot.docs
+      .map((doc) => {
+        const data = doc.data() as (DemoRun & { startedAtEpoch?: number }) | undefined;
+        if (!data?.id) {
+          return null;
+        }
+
+        const { startedAtEpoch: _ignored, ...run } = data;
+        return run;
+      })
+      .filter((run): run is DemoRun => Boolean(run));
+  }
+}
+
+class BlobRunStore implements RunStore {
+  readonly kind = "blob" as const;
+  private readonly token: string;
+  private readonly prefix: string;
+  private readonly maxRuns: number;
+
+  constructor(config: { token: string; prefix: string; maxRuns: number }) {
+    this.token = config.token;
+    this.prefix = config.prefix.replace(/\/+$/, "");
+    this.maxRuns = config.maxRuns;
+  }
+
+  private runPath(id: string) {
+    return `${this.prefix}/${id}.json`;
+  }
+
+  private async readRun(url: string) {
+    const response = await fetch(url, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const body = await response.text();
+    if (!body.trim()) {
+      return null;
+    }
+
+    const parsed = JSON.parse(body) as DemoRun;
+    return parsed?.id ? parsed : null;
+  }
+
+  private async listBlobs() {
+    const result = await list({
+      prefix: `${this.prefix}/`,
+      token: this.token,
+    });
+
+    return [...result.blobs].sort(
+      (left, right) =>
+        new Date(right.uploadedAt).getTime() - new Date(left.uploadedAt).getTime()
+    );
+  }
+
+  private async trimOverflow() {
+    const blobs = await this.listBlobs();
+    const stale = blobs.slice(this.maxRuns);
+    if (stale.length === 0) {
+      return;
+    }
+
+    await del(
+      stale.map((blob) => blob.pathname),
+      { token: this.token }
+    );
+  }
+
+  async save(run: DemoRun) {
+    await put(this.runPath(run.id), JSON.stringify(run), {
+      access: "public",
+      token: this.token,
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      contentType: "application/json",
+      cacheControlMaxAge: 60,
+    });
+    await this.trimOverflow();
+  }
+
+  async get(id: string) {
+    const match = (await this.listBlobs()).find(
+      (blob) => blob.pathname === this.runPath(id)
+    );
+
+    if (!match) {
+      return null;
+    }
+
+    return this.readRun(match.url);
+  }
+
+  async list(limit = 50) {
+    const blobs = (await this.listBlobs()).slice(0, limit);
+    const runs = await Promise.all(blobs.map((blob) => this.readRun(blob.url)));
+    return runs.filter((run): run is DemoRun => Boolean(run));
   }
 }
 
@@ -105,11 +256,41 @@ export function getRunStore(localRuns: Map<string, DemoRun>) {
     return singleton;
   }
 
+  const backend = envValue("RUN_STORE_BACKEND")?.toLowerCase();
+  const projectId =
+    envValue("GOOGLE_CLOUD_PROJECT") ??
+    envValue("GCLOUD_PROJECT") ??
+    envValue("GCP_PROJECT");
+  const firestoreCollection =
+    envValue("FIRESTORE_RUN_COLLECTION") ?? "kova_demo_runs";
+  const firestoreDatabaseId = envValue("FIRESTORE_DATABASE_ID");
+  const blobToken = envValue("BLOB_READ_WRITE_TOKEN");
   const url = envValue("UPSTASH_REDIS_REST_URL") ?? envValue("KV_REST_API_URL");
   const token =
     envValue("UPSTASH_REDIS_REST_TOKEN") ?? envValue("KV_REST_API_TOKEN");
   const prefix = envValue("RUN_STORE_PREFIX") ?? "kova:demo-runs";
   const maxRuns = Number(envValue("RUN_STORE_MAX") ?? "100");
+  const preferFirestore =
+    backend === "firestore" ||
+    (!backend && Boolean(envValue("K_SERVICE")) && Boolean(projectId));
+
+  if (preferFirestore && projectId) {
+    singleton = new FirestoreRunStore({
+      projectId,
+      collectionName: firestoreCollection,
+      databaseId: firestoreDatabaseId,
+    });
+    return singleton;
+  }
+
+  if (blobToken) {
+    singleton = new BlobRunStore({
+      token: blobToken,
+      prefix: "kova-demo-runs",
+      maxRuns,
+    });
+    return singleton;
+  }
 
   if (url && token) {
     singleton = new RedisRunStore({ url, token, prefix, maxRuns });

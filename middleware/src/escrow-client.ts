@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import {
-  getOrCreateAssociatedTokenAccount,
+  getAssociatedTokenAddressSync,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
@@ -118,23 +118,10 @@ export class EscrowClient {
     )[0];
   }
 
-  private async ensureTokenAccounts() {
-    const buyerAta = await getOrCreateAssociatedTokenAccount(
-      this.connection,
-      this.buyer,
-      this.mint,
-      this.buyer.publicKey
-    );
-    const sellerAta = await getOrCreateAssociatedTokenAccount(
-      this.connection,
-      this.buyer,
-      this.mint,
-      this.seller.publicKey
-    );
-
+  private deriveTokenAccounts() {
     return {
-      buyerAta: buyerAta.address,
-      sellerAta: sellerAta.address,
+      buyerAta: getAssociatedTokenAddressSync(this.mint, this.buyer.publicKey),
+      sellerAta: getAssociatedTokenAddressSync(this.mint, this.seller.publicKey),
     };
   }
 
@@ -145,7 +132,7 @@ export class EscrowClient {
   }): Promise<EscrowCreation> {
     const nonce = this.nextNonce();
     const escrowPda = this.deriveEscrowPda(nonce);
-    const { buyerAta, sellerAta } = await this.ensureTokenAccounts();
+    const { buyerAta, sellerAta } = this.deriveTokenAccounts();
     const vaultAta = await anchor.utils.token.associatedAddress({
       mint: this.mint,
       owner: escrowPda,

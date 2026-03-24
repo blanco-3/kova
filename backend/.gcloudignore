@@ -1,0 +1,9 @@
+.git
+.gitignore
+.gcloudignore
+.env
+.env.*
+.vercel
+node_modules
+*.log
+coverage

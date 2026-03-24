@@ -56,7 +56,7 @@ The escrow program supports:
 - `middleware/src/index.ts` owns the live demo API
 - `middleware/src/escrow-client.ts` submits Anchor instructions with buyer/seller keypairs
 - `middleware/src/types.ts` defines the run registry shape used by the UI
-- The middleware keeps a small in-memory run registry instead of a database
+- The public backend can persist demo runs in Firestore when deployed on Cloud Run
 
 ### Demo servers
 
@@ -161,8 +161,10 @@ Copy `.env.example` and set:
 - `MALICIOUS_SERVER_URL`
 - `FACILITATOR_URL`
 - `NEXT_PUBLIC_DEMO_API_BASE`
-- `KV_REST_API_URL` or `UPSTASH_REDIS_REST_URL` for a serverless public backend
-- `KV_REST_API_TOKEN` or `UPSTASH_REDIS_REST_TOKEN` for a serverless public backend
+- `RUN_STORE_BACKEND=firestore`
+- `FIRESTORE_RUN_COLLECTION`
+- `FIRESTORE_DATABASE_ID` if you want a non-default Firestore database
+- `BUYER_KEYPAIR_JSON` / `SELLER_KEYPAIR_JSON` if the backend runs on Cloud Run instead of a local filesystem
 
 The public facilitator used by the demo is `https://www.x402.org/facilitator`.
 
@@ -196,7 +198,20 @@ The frontend is a standalone Next.js app under `app/`.
 Recommended judge-facing deployment:
 
 - frontend: Vercel
-- public demo backend: Vercel serverless with Upstash Redis / Vercel KV for run persistence
+- public demo backend: GCP Cloud Run with Firestore-backed run persistence
+
+To deploy the backend on GCP:
+
+```bash
+npm run gcp:backend:deploy
+```
+
+The deploy script enables the required services, creates Firestore if needed, converts the local buyer and seller keypair files into JSON env vars, and deploys a single Cloud Run service that mounts:
+
+- `/api/demo/run`
+- `/api/escrows`
+- `/api/demo/honest`
+- `/api/demo/malicious`
 
 To deploy the frontend on Vercel:
 
@@ -209,15 +224,15 @@ Important:
 
 - the frontend needs a public middleware URL to run the live scenarios
 - the current local default `http://127.0.0.1:8787` only works for local development
-- the hosted public backend runs in a synchronous demo mode so judges can click through the scenarios without depending on the local dev stack
-- if the backend is deployed on Vercel, persistent run history requires Redis/KV env vars so `/api/escrows` survives across serverless invocations
+- the Cloud Run backend can run the full live devnet settlement flow when buyer SOL and devnet USDC are funded
+- Firestore keeps `/api/escrows` history stable across requests
 
 Example production-style split:
 
 - `https://kova-henna.vercel.app` -> frontend
-- `https://kova-backend.vercel.app` -> public demo backend
-- `https://kova-backend.vercel.app/api/demo/honest` -> honest demo endpoint
-- `https://kova-backend.vercel.app/api/demo/malicious` -> malicious demo endpoint
+- `https://kova-backend-s6dwdvbzwa-du.a.run.app` -> public demo backend
+- `https://kova-backend-s6dwdvbzwa-du.a.run.app/api/demo/honest` -> honest demo endpoint
+- `https://kova-backend-s6dwdvbzwa-du.a.run.app/api/demo/malicious` -> malicious demo endpoint
 
 ## Demo outcomes
 
@@ -261,12 +276,14 @@ The `no_escrow` path was also validated through the middleware run registry and 
 
 ## Public backend persistence
 
-The judge-facing backend stores demo runs in Redis when any of the following env pairs are present:
+The judge-facing backend stores demo runs in Vercel Blob when `BLOB_READ_WRITE_TOKEN` is present.
+
+If Blob is unavailable, it falls back to Redis when either of the following env pairs are present:
 
 - `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
 - `KV_REST_API_URL` + `KV_REST_API_TOKEN`
 
-Without one of those pairs, the backend falls back to in-memory storage and `/api/escrows` will not persist across serverless invocations.
+Without Blob or Redis, the backend falls back to in-memory storage and `/api/escrows` will not persist across serverless invocations.
 
 ## Submission assets
 

@@ -280,8 +280,8 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
 
             <p className="proof-note">
               {locale === "ko"
-                ? "에스크로 시나리오는 실제 Solana devnet 거래를 생성하며, 아래 최근 실행 보드에서 PDA와 트랜잭션을 확인할 수 있습니다."
-                : "Escrowed scenarios emit real Solana devnet transactions. Review the PDA and transaction proofs in the recent executions board below."}
+                ? "최근 실행 보드에서 에스크로 라이프사이클과 증빙 정보를 확인할 수 있습니다. 라이브 settlement가 켜진 환경에서는 PDA와 트랜잭션 링크도 함께 표시됩니다."
+                : "Review the escrow lifecycle and proof details in the recent executions board below. When live settlement is enabled, PDA and transaction links appear here as well."}
             </p>
 
             {error && <p className="error-copy">{translateRuntimeText(error, locale)}</p>}
@@ -346,7 +346,8 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
                         </span>
                         <div className="proof-value-row">
                           <code>{shortenValue(run.escrowPda)}</code>
-                          {explorerHref("address", run.escrowPda, run.cluster) ? (
+                          {run.txSignatures.length > 0 &&
+                          explorerHref("address", run.escrowPda, run.cluster) ? (
                             <a
                               href={explorerHref("address", run.escrowPda, run.cluster)}
                               target="_blank"

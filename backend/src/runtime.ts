@@ -29,6 +29,14 @@ interface RuntimeConfig {
   simulatePublicDemo: boolean;
 }
 
+function defaultDemoEndpoint(port: number) {
+  if (envValue("K_SERVICE") || process.env.VERCEL) {
+    return undefined;
+  }
+
+  return `http://127.0.0.1:${port}`;
+}
+
 function envValue(name: string) {
   const value = process.env[name];
   return value?.trim() ? value.trim() : undefined;
@@ -52,11 +60,9 @@ export const runSchema = z.object({
 function resolveConfig(): RuntimeConfig {
   return {
     honestServerUrl:
-      envValue("HONEST_SERVER_URL") ??
-      (process.env.VERCEL ? undefined : "http://127.0.0.1:8788"),
+      envValue("HONEST_SERVER_URL") ?? defaultDemoEndpoint(8788),
     maliciousServerUrl:
-      envValue("MALICIOUS_SERVER_URL") ??
-      (process.env.VERCEL ? undefined : "http://127.0.0.1:8789"),
+      envValue("MALICIOUS_SERVER_URL") ?? defaultDemoEndpoint(8789),
     programId:
       envValue("ESCROW_PROGRAM_ID") ??
       "CTRDkdc7fN427u2p3gVHJvosy2GihnRwer5T6CM98xtH",
@@ -100,6 +106,54 @@ const runs = new Map<string, DemoRun>();
 const runStore = getRunStore(runs);
 const amountAtomic = Math.round(config.amountUsdc * 1_000_000);
 
+async function persistRun(run: DemoRun) {
+  runs.set(run.id, run);
+
+  try {
+    await runStore.save(run);
+  } catch (error) {
+    console.error("runStore.save failed", error);
+  }
+}
+
+async function loadRun(runId: string) {
+  try {
+    return (await runStore.get(runId)) ?? runs.get(runId) ?? null;
+  } catch (error) {
+    console.error("runStore.get failed", error);
+    return runs.get(runId) ?? null;
+  }
+}
+
+async function loadRuns() {
+  try {
+    return await runStore.list();
+  } catch (error) {
+    console.error("runStore.list failed", error);
+    return [...runs.values()].sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  }
+}
+
+function currentSignatures(runId: string) {
+  return [...(runs.get(runId)?.txSignatures ?? [])];
+}
+
+function timingConfig() {
+  if (config.simulatePublicDemo) {
+    return {
+      submitOffsetSeconds: 15,
+      verifyWindowSeconds: 45,
+      timeoutWaitMs: 16_000,
+    };
+  }
+
+  return {
+    submitOffsetSeconds: 12,
+    verifyWindowSeconds: 30,
+    timeoutWaitMs: 13_000,
+  };
+}
+
 function clusterLabel(rpc: string): string {
   if (rpc.includes("127.0.0.1") || rpc.includes("localhost")) {
     return "localnet";
@@ -114,6 +168,10 @@ function clusterLabel(rpc: string): string {
 
 function nowIso(): string {
   return new Date().toISOString();
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function routeLabel(scenario: DemoScenario): string {
@@ -143,8 +201,7 @@ async function createRun(scenario: DemoScenario, prompt: string): Promise<DemoRu
     timeline: [],
   };
 
-  runs.set(id, run);
-  await runStore.save(run);
+  await persistRun(run);
   return run;
 }
 
@@ -155,8 +212,7 @@ async function updateRun(runId: string, updates: Partial<DemoRun>) {
   }
 
   const nextRun = { ...current, ...updates };
-  runs.set(runId, nextRun);
-  await runStore.save(nextRun);
+  await persistRun(nextRun);
 }
 
 async function pushTimeline(
@@ -183,8 +239,7 @@ async function pushTimeline(
     ],
   };
 
-  runs.set(runId, nextRun);
-  await runStore.save(nextRun);
+  await persistRun(nextRun);
 }
 
 async function loadBuyerSigner() {
@@ -227,19 +282,28 @@ async function runSuccessScenario(
     await raw402Request(`${endpoints.honestServerUrl}/direct`, run.prompt);
   }
 
-  const submitDeadline = Math.floor(Date.now() / 1000) + (config.simulatePublicDemo ? 2 : 8);
-  const verifyDeadline = submitDeadline + (config.simulatePublicDemo ? 8 : 20);
-  const created = await escrowClient.createEscrow({
-    amount: amountAtomic,
-    submitDeadline,
-    verifyDeadline,
-  });
+  const created = config.simulatePublicDemo
+    ? escrowClient.previewEscrow()
+    : await (async () => {
+        const timing = timingConfig();
+        const submitDeadline = Math.floor(Date.now() / 1000) + timing.submitOffsetSeconds;
+        const verifyDeadline = submitDeadline + timing.verifyWindowSeconds;
+        return escrowClient.createEscrow({
+          amount: amountAtomic,
+          submitDeadline,
+          verifyDeadline,
+        });
+      })();
+  const createdSignature =
+    "signature" in created && typeof created.signature === "string"
+      ? created.signature
+      : undefined;
 
   await updateRun(run.id, {
     status: "created",
     reason: "Escrow funded and waiting on service delivery",
     escrowPda: created.escrowPda.toBase58(),
-    txSignatures: [created.signature],
+    txSignatures: createdSignature ? [createdSignature] : [],
   });
   await pushTimeline(
     run.id,
@@ -267,14 +331,15 @@ async function runSuccessScenario(
         return resultResponse.text();
       })();
   const resultHash = sha256Hex(result);
-  const commitSignature = await escrowClient.commitResultHash(
-    created.escrowPda,
-    sha256Bytes(result)
-  );
+  const commitSignature = config.simulatePublicDemo
+    ? null
+    : await escrowClient.commitResultHash(created.escrowPda, sha256Bytes(result));
   await updateRun(run.id, {
     status: "hash_committed",
     resultHash,
-    txSignatures: [...(runs.get(run.id)?.txSignatures ?? []), commitSignature],
+    txSignatures: commitSignature
+      ? [...currentSignatures(run.id), commitSignature]
+      : currentSignatures(run.id),
   });
   await pushTimeline(
     run.id,
@@ -289,19 +354,27 @@ async function runSuccessScenario(
     "Seller returned deterministic translation payload"
   );
 
-  const releaseSignature = await escrowClient.verifyAndRelease(
-    created.escrowPda,
-    created.vaultAta,
-    created.sellerAta,
-    Buffer.from(result)
-  );
+  if (config.simulatePublicDemo) {
+    await sleep(350);
+  }
+
+  const releaseSignature = config.simulatePublicDemo
+    ? null
+    : await escrowClient.verifyAndRelease(
+        created.escrowPda,
+        created.vaultAta,
+        created.sellerAta,
+        Buffer.from(result)
+      );
 
   await updateRun(run.id, {
     status: "completed",
     reason: "Matching result hash released escrow to the seller",
     resultPreview: result,
     completedAt: nowIso(),
-    txSignatures: [...(runs.get(run.id)?.txSignatures ?? []), releaseSignature],
+    txSignatures: releaseSignature
+      ? [...currentSignatures(run.id), releaseSignature]
+      : currentSignatures(run.id),
   });
   await pushTimeline(
     run.id,
@@ -325,19 +398,28 @@ async function runTimeoutScenario(
     await raw402Request(`${endpoints.maliciousServerUrl}/direct`, run.prompt);
   }
 
-  const submitDeadline = Math.floor(Date.now() / 1000) + (config.simulatePublicDemo ? 2 : 8);
-  const verifyDeadline = submitDeadline + (config.simulatePublicDemo ? 8 : 20);
-  const created = await escrowClient.createEscrow({
-    amount: amountAtomic,
-    submitDeadline,
-    verifyDeadline,
-  });
+  const created = config.simulatePublicDemo
+    ? escrowClient.previewEscrow()
+    : await (async () => {
+        const timing = timingConfig();
+        const submitDeadline = Math.floor(Date.now() / 1000) + timing.submitOffsetSeconds;
+        const verifyDeadline = submitDeadline + timing.verifyWindowSeconds;
+        return escrowClient.createEscrow({
+          amount: amountAtomic,
+          submitDeadline,
+          verifyDeadline,
+        });
+      })();
+  const createdSignature =
+    "signature" in created && typeof created.signature === "string"
+      ? created.signature
+      : undefined;
 
   await updateRun(run.id, {
     status: "created",
     reason: "Escrow funded and waiting for a result that never arrives",
     escrowPda: created.escrowPda.toBase58(),
-    txSignatures: [created.signature],
+    txSignatures: createdSignature ? [createdSignature] : [],
   });
   await pushTimeline(
     run.id,
@@ -364,22 +446,29 @@ async function runTimeoutScenario(
     }
   }
 
-  await new Promise((resolve) =>
-    setTimeout(resolve, config.simulatePublicDemo ? 2_500 : 6_000)
-  );
+  if (config.simulatePublicDemo) {
+    await sleep(1_200);
+  } else {
+    const timing = timingConfig();
+    await sleep(timing.timeoutWaitMs);
+  }
 
-  const refundSignature = await escrowClient.claimBuyerRefund(
-    created.escrowPda,
-    created.vaultAta,
-    created.buyerAta,
-    created.sellerAta
-  );
+  const refundSignature = config.simulatePublicDemo
+    ? null
+    : await escrowClient.claimBuyerRefund(
+        created.escrowPda,
+        created.vaultAta,
+        created.buyerAta,
+        created.sellerAta
+      );
 
   await updateRun(run.id, {
     status: "refunded",
     reason: "Seller never committed a result hash before submit deadline",
     completedAt: nowIso(),
-    txSignatures: [...(runs.get(run.id)?.txSignatures ?? []), refundSignature],
+    txSignatures: refundSignature
+      ? [...currentSignatures(run.id), refundSignature]
+      : currentSignatures(run.id),
   });
   await pushTimeline(
     run.id,
@@ -487,7 +576,7 @@ export function getHealthSummary() {
 }
 
 export async function listRuns() {
-  return runStore.list();
+  return loadRuns();
 }
 
 export async function executeScenario(
@@ -514,5 +603,5 @@ export async function executeScenario(
     runId: run.id,
     status: runs.get(run.id)?.status,
   });
-  return (await runStore.get(run.id)) ?? runs.get(run.id) ?? run;
+  return (await loadRun(run.id)) ?? run;
 }
