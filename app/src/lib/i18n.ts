@@ -327,8 +327,8 @@ export function translateRoute(route: string, locale: Locale) {
 
 export function getDefaultPrompt(locale: Locale) {
   return locale === "ko"
-    ? "'서비스 전달이 증명된 후에만 자금이 릴리즈된다'를 영어로 번역해줘."
-    : "Translate 'funds release only after service delivery is proven' into Korean.";
+    ? '다음 정책 문장을 한국어로 번역해줘: "Funds release only after service delivery is proven."'
+    : 'Translate this policy line into Korean: "Funds release only after service delivery is proven."';
 }
 
 export function localeTime(locale: Locale) {
