@@ -1,8 +1,7 @@
-import "dotenv/config";
-
 import cors from "cors";
 import express from "express";
 import fs from "node:fs";
+import path from "node:path";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
 import { wrapFetchWithPaymentFromConfig } from "@x402/fetch";
 import {
@@ -10,10 +9,21 @@ import {
   SOLANA_DEVNET_CAIP2,
   toClientSvmSigner,
 } from "@x402/svm";
+import { config as loadEnv } from "dotenv";
 import { z } from "zod";
 import { EscrowClient } from "./escrow-client";
 import { sha256Bytes, sha256Hex } from "./hash-utils";
 import type { DemoRun, DemoScenario, DemoStatus } from "./types";
+
+for (const envPath of [
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(process.cwd(), "../.env"),
+]) {
+  if (fs.existsSync(envPath)) {
+    loadEnv({ path: envPath });
+    break;
+  }
+}
 
 const app = express();
 app.use(cors());

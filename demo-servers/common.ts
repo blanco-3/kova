@@ -1,12 +1,22 @@
-import "dotenv/config";
-
 import express from "express";
 import fs from "node:fs";
+import path from "node:path";
 import { paymentMiddleware } from "@x402/express";
 import { HTTPFacilitatorClient, x402ResourceServer } from "@x402/core/server";
 import { SOLANA_DEVNET_CAIP2 } from "@x402/svm";
 import { ExactSvmScheme } from "@x402/svm/exact/server";
 import { Keypair } from "@solana/web3.js";
+import { config as loadEnv } from "dotenv";
+
+for (const envPath of [
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(process.cwd(), "../.env"),
+]) {
+  if (fs.existsSync(envPath)) {
+    loadEnv({ path: envPath });
+    break;
+  }
+}
 
 export function loadSellerKeypair() {
   const keypairPath =
@@ -26,7 +36,7 @@ export function createDemoApp(description: string) {
 
   const seller = loadSellerKeypair();
   const facilitator = new HTTPFacilitatorClient({
-    url: process.env.FACILITATOR_URL ?? "https://facilitator.x402.org",
+    url: process.env.FACILITATOR_URL ?? "https://www.x402.org/facilitator",
   });
   const resourceServer = new x402ResourceServer(facilitator).register(
     SOLANA_DEVNET_CAIP2,

@@ -88,7 +88,7 @@ export class EscrowClient {
       commitment: "confirmed",
     });
 
-    return new anchor.Program(X402_ESCROW_IDL, provider);
+    return new anchor.Program({ ...X402_ESCROW_IDL, events: [] } as any, provider);
   }
 
   private nextNonce(): bigint {

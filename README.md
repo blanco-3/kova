@@ -155,6 +155,8 @@ Copy `.env.example` and set:
 - `FACILITATOR_URL`
 - `NEXT_PUBLIC_DEMO_API_BASE`
 
+The public facilitator used by the demo is `https://www.x402.org/facilitator`.
+
 ## Demo outcomes
 
 The dashboard is optimized around exactly three judge-facing scenarios:
