@@ -143,6 +143,12 @@ function explorerHref(kind: "tx" | "address", value: string, cluster: string) {
     : `https://explorer.solana.com/address/${value}?cluster=devnet`;
 }
 
+function scenarioCardClass(scenario: DemoScenario) {
+  if (scenario === "success") return "timeline-card-success";
+  if (scenario === "timeout") return "timeline-card-timeout";
+  return "timeline-card-no-escrow";
+}
+
 function busyStatusCopy(scenario: DemoScenario, locale: Locale) {
   if (locale === "ko") {
     if (scenario === "success") {
@@ -346,40 +352,30 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
           </div>
           <div className="timeline-grid">
             {recentRuns.map((run) => (
-              <article key={run.id} className="timeline-card">
-                <div className="scenario-copy">
-                  <div>
-                    <h2
-                      style={{
-                        color:
-                          run.scenario === "success"
-                            ? "var(--teal)"
-                            : run.scenario === "timeout"
-                              ? "var(--orange)"
-                              : "var(--red)",
-                      }}
-                    >
+              <article
+                key={run.id}
+                className={`timeline-card ${scenarioCardClass(run.scenario)}`}
+              >
+                <div className="recent-card-header">
+                  <div className="recent-card-heading">
+                    <h3 className="recent-card-title">
                       {run.scenario === "success"
                         ? translateScenario("success", locale)
                         : run.scenario === "timeout"
                           ? translateScenario("timeout", locale)
                           : translateScenario("no_escrow", locale)}
-                    </h2>
-                    <span
-                      style={{
-                        fontSize: "0.8rem",
-                        color: "var(--ink-muted)",
-                        fontFamily: "var(--font-mono)",
-                      }}
-                    >
+                    </h3>
+                    <p className="recent-card-route">
                       {translateRoute(run.route, locale)}
-                    </span>
+                    </p>
                   </div>
                   <span className={`status-pill status-${run.status}`}>
                     {translateStatus(run.status, locale)}
                   </span>
                 </div>
-                <p>{translateRuntimeText(run.reason, locale)}</p>
+                <p className="recent-card-reason">
+                  {translateRuntimeText(run.reason, locale)}
+                </p>
                 {(run.escrowPda || run.resultHash || run.txSignatures.length > 0) && (
                   <div className="proof-strip">
                     {run.escrowPda ? (
@@ -448,7 +444,9 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
                       key={`${run.id}-${item.at}-${item.label}`}
                       className="timeline-item"
                     >
-                      <p>{new Date(item.at).toLocaleTimeString(localeTime(locale))}</p>
+                      <time className="timeline-time" dateTime={item.at}>
+                        {new Date(item.at).toLocaleTimeString(localeTime(locale))}
+                      </time>
                       <div className="timeline-copy">
                         <span className="timeline-step">
                           {translateTimelineLabel(item.label, locale)}

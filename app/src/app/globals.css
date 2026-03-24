@@ -1013,12 +1013,14 @@ html, body {
 .timeline-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 24px;
   margin-top: 0;
   align-items: start;
 }
 
 .timeline-card {
+  display: grid;
+  gap: 18px;
   padding: 28px;
   border-radius: 20px;
   background: var(--bg-card);
@@ -1029,42 +1031,91 @@ html, body {
 }
 
 .timeline-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: var(--glass-border-strong);
 }
 
-.timeline-card .scenario-copy {
-  margin-bottom: 4px;
+.timeline-card-success {
+  border-color: rgba(45, 212, 168, 0.18);
 }
 
-.timeline-card h2 {
-  font-size: 1.05rem;
+.timeline-card-timeout {
+  border-color: rgba(245, 158, 11, 0.18);
+}
+
+.timeline-card-no-escrow {
+  border-color: rgba(239, 68, 68, 0.18);
+}
+
+.recent-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.recent-card-heading {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.recent-card-title {
+  font-size: 1.08rem;
   font-weight: 600;
   margin: 0;
   line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.timeline-card-success .recent-card-title {
   color: var(--teal);
 }
 
-/* Color-code timeline card titles */
-.timeline-card .section-label {
-  display: none;
+.timeline-card-timeout .recent-card-title {
+  color: var(--orange);
 }
 
-.timeline-card > p {
+.timeline-card-no-escrow .recent-card-title {
+  color: var(--red);
+}
+
+.recent-card-route {
+  margin: 0;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.recent-card-reason {
   color: var(--ink-secondary);
   font-size: 0.85rem;
-  line-height: 1.5;
-  margin: 8px 0 20px;
-  padding: 12px 16px;
+  line-height: 1.6;
+  margin: 0;
+  padding: 14px 16px;
   background: var(--bg-deep);
   border-radius: 10px;
-  border-left: 3px solid var(--glass-border-strong);
+  border-left: 3px solid var(--glass-border);
+}
+
+.timeline-card-success .recent-card-reason {
+  border-left-color: var(--teal);
+}
+
+.timeline-card-timeout .recent-card-reason {
+  border-left-color: var(--orange);
+}
+
+.timeline-card-no-escrow .recent-card-reason {
+  border-left-color: var(--red);
 }
 
 .proof-strip {
   display: grid;
-  gap: 10px;
-  margin: 0 0 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
 }
 
 .proof-item {
@@ -1072,6 +1123,7 @@ html, body {
   border-radius: 12px;
   border: 1px solid var(--glass-border);
   background: var(--bg-deep);
+  min-width: 0;
 }
 
 .proof-label {
@@ -1095,6 +1147,8 @@ html, body {
   font-family: var(--font-mono);
   font-size: 0.78rem;
   color: var(--ink-primary);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .proof-links {
@@ -1127,17 +1181,19 @@ html, body {
 
 .timeline-list {
   display: grid;
-  gap: 0;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--glass-border);
 }
 
 .timeline-item {
-  padding: 10px 0;
+  padding: 0;
   border-radius: 0;
   background: transparent;
   border: none;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 14px;
 }
 
 .timeline-label {
@@ -1157,6 +1213,7 @@ html, body {
 .timeline-copy {
   display: grid;
   gap: 4px;
+  min-width: 0;
 }
 
 .timeline-step {
@@ -1176,13 +1233,14 @@ html, body {
   flex-shrink: 0;
 }
 
-.timeline-item p {
+.timeline-time {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   color: var(--ink-muted);
   margin: 0;
   flex-shrink: 0;
-  min-width: 70px;
+  min-width: 0;
+  padding-top: 1px;
 }
 
 /* ================================================
@@ -1233,6 +1291,10 @@ html, body {
   .timeline-grid {
     grid-template-columns: 1fr;
   }
+
+  .proof-strip {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1252,6 +1314,20 @@ html, body {
 
   .button-row {
     grid-template-columns: 1fr;
+  }
+
+  .recent-card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .timeline-item {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .timeline-time {
+    padding-top: 0;
   }
 
   .hero-cta-row {
