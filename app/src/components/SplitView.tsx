@@ -23,9 +23,23 @@ export interface Scenario {
 
 export function SplitView({ scenarios }: { scenarios: Scenario[] }) {
   return (
-    <section className="split-grid">
+    <section className="comparison-shell">
+      <div className="comparison-head">
+        <div>
+          <p className="section-label">Before / after</p>
+          <h2>Same request. Two completely different settlement outcomes.</h2>
+        </div>
+        <p>
+          The left lane shows why direct x402 is fragile. The right lane shows
+          the escrowed path that turns failure into an explicit refund.
+        </p>
+      </div>
+      <div className="split-grid">
       {scenarios.map((scenario) => (
-        <article key={scenario.key} className="split-card">
+        <article
+          key={scenario.key}
+          className={`split-card split-${scenario.key}`}
+        >
           <div className="scenario-copy">
             <div>
               <p className="section-label">{scenario.mode}</p>
@@ -47,6 +61,7 @@ export function SplitView({ scenarios }: { scenarios: Scenario[] }) {
           </div>
         </article>
       ))}
+      </div>
     </section>
   );
 }

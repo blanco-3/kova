@@ -102,17 +102,30 @@ export function DemoDashboard() {
 
   return (
     <>
-      <section className="control-panel">
-        <div className="control-copy">
+      <section className="demo-stage">
+        <div className="demo-stage-copy">
           <p className="section-label">Live demo controls</p>
-          <h2>Run the exact three scenarios judges need to see.</h2>
+          <h2>Run the three judge-facing flows from one board.</h2>
           <p>
-            The middleware polls the run registry, drives the on-chain escrow
-            flow, and contrasts it with the direct x402 path where funds can be
-            lost after payment.
+            This screen is optimized for one question only: does x402 settle
+            before delivery, or only after delivery is proven?
           </p>
+          <div className="demo-checklist">
+            <div>
+              <span>1</span>
+              <p>Start with the direct-loss baseline.</p>
+            </div>
+            <div>
+              <span>2</span>
+              <p>Show the honest trade releasing from escrow.</p>
+            </div>
+            <div>
+              <span>3</span>
+              <p>Show the malicious route refunding the buyer.</p>
+            </div>
+          </div>
         </div>
-        <div className="control-actions">
+        <div className="control-panel">
           <label className="prompt-field">
             <span className="section-label">Prompt</span>
             <textarea
@@ -148,9 +161,15 @@ export function DemoDashboard() {
               {busyScenario === "no_escrow" ? "Running..." : "Without Escrow"}
             </button>
           </div>
-          <div className="control-meta">
-            <span>API</span>
-            <strong>{apiBase}</strong>
+          <div className="control-grid">
+            <div className="control-meta">
+              <span>API</span>
+              <strong>{apiBase}</strong>
+            </div>
+            <div className="control-meta">
+              <span>Run count</span>
+              <strong>{runs.length}</strong>
+            </div>
           </div>
           {error ? <p className="error-copy">{error}</p> : null}
         </div>

@@ -23,7 +23,9 @@ export function EscrowTracker({ escrows }: { escrows: EscrowRow[] }) {
           <p className="section-label">Live board</p>
           <h2>Escrow lifecycle tracker</h2>
         </div>
-        <p>Created {"->"} HashCommitted {"->"} Completed / Refunded / Disputed</p>
+        <p className="tracker-legend">
+          Created {"->"} HashCommitted {"->"} Completed / Refunded / Disputed
+        </p>
       </div>
       <table className="tracker-table">
         <thead>
