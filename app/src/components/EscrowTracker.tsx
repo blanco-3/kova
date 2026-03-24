@@ -7,6 +7,9 @@ export interface EscrowRow {
   amount: string;
   lifecycle: string;
   hash: string;
+  escrowPda?: string;
+  txSignatures: string[];
+  cluster: string;
   status:
     | "created"
     | "hash_committed"
@@ -14,6 +17,24 @@ export interface EscrowRow {
     | "refunded"
     | "disputed"
     | "lost";
+}
+
+function shortenValue(value: string, start = 6, end = 6) {
+  if (value.length <= start + end + 3) {
+    return value;
+  }
+
+  return `${value.slice(0, start)}...${value.slice(-end)}`;
+}
+
+function explorerHref(kind: "tx" | "address", value: string, cluster: string) {
+  if (cluster !== "devnet") {
+    return undefined;
+  }
+
+  return kind === "tx"
+    ? `https://explorer.solana.com/tx/${value}?cluster=devnet`
+    : `https://explorer.solana.com/address/${value}?cluster=devnet`;
 }
 
 export function EscrowTracker({
@@ -68,17 +89,41 @@ export function EscrowTracker({
             <tr key={escrow.id}>
               <td>
                 <strong>{escrow.id}</strong>
+                <span className="tracker-subtext">{escrow.lifecycle}</span>
               </td>
               <td
                 style={{ color: "var(--ink-secondary)", fontSize: "0.9rem" }}
               >
-                {escrow.pair}
+                <div>{escrow.pair}</div>
+                {escrow.escrowPda ? (
+                  (() => {
+                    const href = explorerHref("address", escrow.escrowPda, escrow.cluster);
+                    return (
+                      <div className="tracker-proof-line">
+                        <span>PDA</span>
+                        {href ? (
+                          <a href={href} target="_blank" rel="noopener noreferrer">
+                            {shortenValue(escrow.escrowPda)}
+                          </a>
+                        ) : (
+                          <span>{shortenValue(escrow.escrowPda)}</span>
+                        )}
+                      </div>
+                    );
+                  })()
+                ) : null}
               </td>
               <td style={{ fontWeight: 500, fontSize: "0.9rem" }}>
                 {escrow.amount}
               </td>
               <td>
                 <code>{escrow.hash}</code>
+                {escrow.txSignatures.length > 0 ? (
+                  <div className="tracker-proof-line">
+                    <span>TX</span>
+                    <span>{escrow.txSignatures.length}</span>
+                  </div>
+                ) : null}
               </td>
               <td>
                 <StatusBadge status={escrow.status} locale={locale} />

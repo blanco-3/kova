@@ -238,6 +238,9 @@ export function buildEscrowRows(runs: DemoRun[], locale: Locale): EscrowRow[] {
     amount: run.amount,
     lifecycle: formatLifecycle(run.startedAt, run.completedAt, locale),
     hash: shortHash(run.resultHash, locale),
+    escrowPda: run.escrowPda,
+    txSignatures: run.txSignatures,
+    cluster: run.cluster,
     status: run.status,
   }));
 }

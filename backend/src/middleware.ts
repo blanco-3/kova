@@ -104,7 +104,7 @@ function routeLabel(scenario: DemoScenario): string {
     case "success":
       return "buyer agent -> honest translator";
     case "timeout":
-      return "buyer agent -> malicious endpoint";
+      return "buyer agent -> delivery-failure endpoint";
     case "no_escrow":
       return "buyer agent -> direct x402 endpoint";
   }
@@ -331,7 +331,7 @@ export function createMiddlewareApp(overrides: Partial<RuntimeConfig> = {}) {
       run.id,
       "402 issued",
       "created",
-      "Malicious server returned x402 payment instructions"
+      "Delivery-failure server returned x402 payment instructions"
     );
 
     const submitDeadline = Math.floor(Date.now() / 1000) + 8;
@@ -352,7 +352,7 @@ export function createMiddlewareApp(overrides: Partial<RuntimeConfig> = {}) {
       run.id,
       "escrow created",
       "created",
-      `Escrow PDA ${created.escrowPda.toBase58()} funded before calling the malicious server`
+      `Escrow PDA ${created.escrowPda.toBase58()} funded before calling the delivery-failure endpoint`
     );
 
     const controller = new AbortController();

@@ -271,12 +271,16 @@ const TIMELINE_LABELS: Record<Locale, Record<TimelineKey, string>> = {
 const ROUTES: Record<Locale, Record<string, string>> = {
   en: {
     "buyer agent -> honest translator": "buyer agent -> honest translator",
-    "buyer agent -> malicious endpoint": "buyer agent -> malicious endpoint",
+    "buyer agent -> malicious endpoint": "buyer agent -> delivery-failure endpoint",
+    "buyer agent -> delivery-failure endpoint":
+      "buyer agent -> delivery-failure endpoint",
     "buyer agent -> direct x402 endpoint": "buyer agent -> direct x402 endpoint",
   },
   ko: {
     "buyer agent -> honest translator": "구매자 에이전트 -> 정상 번역 서버",
-    "buyer agent -> malicious endpoint": "구매자 에이전트 -> 악성 엔드포인트",
+    "buyer agent -> malicious endpoint": "구매자 에이전트 -> 전달 실패 엔드포인트",
+    "buyer agent -> delivery-failure endpoint":
+      "구매자 에이전트 -> 전달 실패 엔드포인트",
     "buyer agent -> direct x402 endpoint": "구매자 에이전트 -> 직접 x402 엔드포인트",
   },
 };
@@ -286,7 +290,9 @@ const EXACT_RUNTIME_TEXT: Record<string, string> = {
   "Honest server returned x402 payment instructions":
     "정상 서버가 x402 결제 요구를 반환했습니다",
   "Malicious server returned x402 payment instructions":
-    "악성 서버가 x402 결제 요구를 반환했습니다",
+    "전달 실패 서버가 x402 결제 요구를 반환했습니다",
+  "Delivery-failure server returned x402 payment instructions":
+    "전달 실패 서버가 x402 결제 요구를 반환했습니다",
   "Seller returned deterministic translation payload":
     "판매자가 고정된 번역 결과를 반환했습니다",
   "Matching result hash released escrow to the seller":
@@ -343,9 +349,11 @@ export function translateRuntimeText(text: string, locale: Locale) {
     return `Escrow PDA ${match[1]}에 ${match[2]} USDC가 예치되었습니다`;
   }
 
-  match = text.match(/^Escrow PDA ([A-Za-z0-9]+) funded before calling the malicious server$/);
+  match = text.match(
+    /^Escrow PDA ([A-Za-z0-9]+) funded before calling the (?:malicious server|delivery-failure endpoint)$/
+  );
   if (match) {
-    return `악성 서버 호출 전에 Escrow PDA ${match[1]}에 예치되었습니다`;
+    return `전달 실패 엔드포인트 호출 전에 Escrow PDA ${match[1]}에 예치되었습니다`;
   }
 
   match = text.match(/^Seller committed ([a-f0-9]+)$/);

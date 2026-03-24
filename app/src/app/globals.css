@@ -751,6 +751,16 @@ html, body {
   white-space: pre-wrap;
 }
 
+.proof-note {
+  color: var(--ink-secondary);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--bg-deep);
+}
+
 .button-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -904,10 +914,37 @@ html, body {
   margin-bottom: 0;
 }
 
+.tracker-subtext {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+}
+
 .tracker-table code {
   font-family: var(--font-mono);
   font-size: 0.8rem;
   color: var(--ink-muted);
+}
+
+.tracker-proof-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+}
+
+.tracker-proof-line a {
+  color: var(--teal);
+  text-decoration: none;
+}
+
+.tracker-proof-line a:hover {
+  text-decoration: underline;
 }
 
 /* ================================================
@@ -1054,6 +1091,70 @@ html, body {
   border-left: 3px solid var(--glass-border-strong);
 }
 
+.proof-strip {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
+.proof-item {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--bg-deep);
+}
+
+.proof-label {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.proof-value-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.proof-value-row code {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-primary);
+}
+
+.proof-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.proof-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--glass-border-strong);
+  color: var(--teal);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.proof-link:hover {
+  border-color: var(--teal);
+}
+
+.proof-link.muted {
+  color: var(--ink-muted);
+}
+
 .timeline-list {
   display: grid;
   gap: 0;
@@ -1081,6 +1182,19 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.timeline-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.timeline-step {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
 }
 
 .timeline-item strong::before {
