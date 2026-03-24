@@ -149,6 +149,16 @@ function scenarioCardClass(scenario: DemoScenario) {
   return "timeline-card-no-escrow";
 }
 
+function normalizeRunError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (message.toLowerCase().includes("failed to fetch")) {
+    return "Live demo backend is temporarily unreachable. Please try again.";
+  }
+
+  return message;
+}
+
 function busyStatusCopy(scenario: DemoScenario, locale: Locale) {
   if (locale === "ko") {
     if (scenario === "success") {
@@ -174,34 +184,39 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
   const [runs, setRuns] = useState<DemoRun[]>([]);
   const [busyScenario, setBusyScenario] = useState<DemoScenario | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
-  const [refreshError, setRefreshError] = useState<string | null>(null);
-  const [hasLoadedRuns, setHasLoadedRuns] = useState(false);
   const prompt = getDefaultPrompt(locale);
   const hasActiveRuns = runs.some(isActiveRun);
-  const visibleError = runError ?? refreshError;
+  const visibleError = runError;
 
   const refreshRuns = useEffectEvent(async () => {
     try {
-      const nextRuns = await fetchRuns();
+      let nextRuns: DemoRun[] | null = null;
+      let lastError: unknown = null;
+
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          nextRuns = await fetchRuns();
+          break;
+        } catch (error) {
+          lastError = error;
+          if (attempt === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 600));
+          }
+        }
+      }
+
+      if (!nextRuns) {
+        throw lastError ?? new Error("Failed to refresh demo runs");
+      }
+
       startTransition(() => {
         setRuns((current) => {
-          const merged = mergeRuns(current, nextRuns);
+          const merged = mergeRuns(current, nextRuns as DemoRun[]);
           return sameRuns(current, merged) ? current : merged;
         });
-        setHasLoadedRuns(true);
-        setRefreshError(null);
       });
     } catch (refreshError) {
       console.warn("Failed to refresh demo runs", refreshError);
-      const message =
-        refreshError instanceof Error
-          ? refreshError.message
-          : "Failed to refresh demo runs";
-      startTransition(() => {
-        if (!hasLoadedRuns && runs.length === 0) {
-          setRefreshError(message);
-        }
-      });
     }
   });
 
@@ -249,12 +264,12 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
         );
       }
       const run = (await response.json().catch(() => null)) as DemoRun | null;
-      if (run?.id) setRuns((current) => mergeRuns(current, [run]));
-      await refreshRuns();
+      if (run?.id) {
+        setRuns((current) => mergeRuns(current, [run]));
+      }
+      void refreshRuns();
     } catch (runError) {
-      setRunError(
-        runError instanceof Error ? runError.message : "Failed to start demo run"
-      );
+      setRunError(normalizeRunError(runError));
     } finally {
       setBusyScenario(null);
     }
