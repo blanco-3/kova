@@ -187,6 +187,35 @@ Smoke-check the middleware path:
 npm run devnet:smoke
 ```
 
+## Frontend deployment
+
+The frontend is a standalone Next.js app under `app/`.
+
+Recommended judge-facing deployment:
+
+- frontend: Vercel
+- middleware + demo servers: an always-on Node host such as Render, Fly.io, Railway, or a VPS
+
+To deploy the frontend on Vercel:
+
+1. import this repository into Vercel
+2. set the project root directory to `app`
+3. set `NEXT_PUBLIC_DEMO_API_BASE` to the public middleware URL
+4. deploy as a standard Next.js app
+
+Important:
+
+- the frontend needs a public middleware URL to run the live scenarios
+- the current local default `http://127.0.0.1:8787` only works for local development
+- Vercel is a good fit for the frontend, but the middleware/demo stack should run on an always-on Node service
+
+Example production-style split:
+
+- `https://x402-escrow.vercel.app` -> frontend
+- `https://x402-escrow-api.onrender.com` -> middleware API
+- `https://x402-honest.onrender.com` -> honest demo server
+- `https://x402-malicious.onrender.com` -> malicious demo server
+
 ## Demo outcomes
 
 The dashboard is optimized around exactly three judge-facing scenarios:
@@ -232,6 +261,8 @@ The `no_escrow` path was also validated through the middleware run registry and 
 - deck outline: [pitch/deck-outline.md](pitch/deck-outline.md)
 - demo script: [pitch/demo-script.md](pitch/demo-script.md)
 - judge Q&A: [pitch/judge-qa.md](pitch/judge-qa.md)
+- submission checklist: [pitch/submission-checklist.md](pitch/submission-checklist.md)
+- submission copy: [pitch/submission-copy.md](pitch/submission-copy.md)
 
 ## Current status
 
@@ -240,3 +271,4 @@ The `no_escrow` path was also validated through the middleware run registry and 
 - workspace TypeScript checks pass
 - Next production build passes
 - middleware, demo servers, and dashboard are wired for the three judge-facing scenarios
+- frontend supports English / Korean UI toggle
