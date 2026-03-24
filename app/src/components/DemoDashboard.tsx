@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  startTransition,
-  useEffect,
-  useEffectEvent,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 import { EscrowTracker } from "./EscrowTracker";
 import { SplitView } from "./SplitView";
 import {
@@ -29,82 +24,6 @@ import {
 const apiBase =
   process.env.NEXT_PUBLIC_DEMO_API_BASE ?? "http://127.0.0.1:8787";
 const localRunsKey = "x402-escrow-demo-runs";
-
-const ACTIVE_STALE_MS = 3 * 60 * 1000; // 3 minutes — any active run older than this is stale
-
-function isActiveRun(run: DemoRun) {
-  if (run.status !== "created" && run.status !== "hash_committed") return false;
-  // Don't treat very old active runs as live — they'll never resolve without a reachable middleware
-  const age = Date.now() - new Date(run.startedAt).getTime();
-  return age < ACTIVE_STALE_MS;
-}
-
-function sameRuns(left: DemoRun[], right: DemoRun[]) {
-  if (left.length !== right.length) {
-    return false;
-  }
-
-  for (let index = 0; index < left.length; index += 1) {
-    const current = left[index];
-    const next = right[index];
-
-    if (
-      current.id !== next.id ||
-      current.status !== next.status ||
-      current.reason !== next.reason ||
-      current.startedAt !== next.startedAt ||
-      current.completedAt !== next.completedAt ||
-      current.escrowPda !== next.escrowPda ||
-      current.resultHash !== next.resultHash ||
-      current.resultPreview !== next.resultPreview ||
-      current.route !== next.route ||
-      current.amount !== next.amount ||
-      current.cluster !== next.cluster
-    ) {
-      return false;
-    }
-
-    if (current.txSignatures.length !== next.txSignatures.length) {
-      return false;
-    }
-
-    for (let signatureIndex = 0; signatureIndex < current.txSignatures.length; signatureIndex += 1) {
-      if (current.txSignatures[signatureIndex] !== next.txSignatures[signatureIndex]) {
-        return false;
-      }
-    }
-
-    if (current.timeline.length !== next.timeline.length) {
-      return false;
-    }
-
-    for (let timelineIndex = 0; timelineIndex < current.timeline.length; timelineIndex += 1) {
-      const currentItem = current.timeline[timelineIndex];
-      const nextItem = next.timeline[timelineIndex];
-
-      if (
-        currentItem.label !== nextItem.label ||
-        currentItem.status !== nextItem.status ||
-        currentItem.at !== nextItem.at ||
-        currentItem.details !== nextItem.details
-      ) {
-        return false;
-      }
-    }
-  }
-
-  return true;
-}
-
-async function fetchRuns(): Promise<DemoRun[]> {
-  const response = await fetch(`${apiBase}/api/escrows`, {
-    cache: "no-store",
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to load escrows: ${response.status}`);
-  }
-  return response.json();
-}
 
 function mergeRuns(current: DemoRun[], incoming: DemoRun[]) {
   const merged = new Map<string, DemoRun>();
@@ -185,61 +104,11 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
   const [busyScenario, setBusyScenario] = useState<DemoScenario | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
   const prompt = getDefaultPrompt(locale);
-  const hasActiveRuns = runs.some(isActiveRun);
   const visibleError = runError;
 
-  const refreshRuns = useEffectEvent(async () => {
-    try {
-      let nextRuns: DemoRun[] | null = null;
-      let lastError: unknown = null;
-
-      for (let attempt = 0; attempt < 2; attempt += 1) {
-        try {
-          nextRuns = await fetchRuns();
-          break;
-        } catch (error) {
-          lastError = error;
-          if (attempt === 0) {
-            await new Promise((resolve) => setTimeout(resolve, 600));
-          }
-        }
-      }
-
-      if (!nextRuns) {
-        throw lastError ?? new Error("Failed to refresh demo runs");
-      }
-
-      startTransition(() => {
-        setRuns((current) => {
-          const merged = mergeRuns(current, nextRuns as DemoRun[]);
-          return sameRuns(current, merged) ? current : merged;
-        });
-      });
-    } catch (refreshError) {
-      console.warn("Failed to refresh demo runs", refreshError);
-    }
-  });
-
   useEffect(() => {
-    startTransition(() => {
-      setRuns(readCachedRuns());
-    });
-    void refreshRuns();
-  }, [refreshRuns]);
-
-  useEffect(() => {
-    const intervalMs = hasActiveRuns ? 2_500 : runs.length > 0 ? 12_000 : 20_000;
-
-    const intervalId = setInterval(() => {
-      if (typeof document !== "undefined" && document.visibilityState !== "visible") {
-        return;
-      }
-
-      void refreshRuns();
-    }, intervalMs);
-
-    return () => clearInterval(intervalId);
-  }, [hasActiveRuns, refreshRuns, runs.length]);
+    setRuns(readCachedRuns());
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -264,10 +133,10 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
         );
       }
       const run = (await response.json().catch(() => null)) as DemoRun | null;
-      if (run?.id) {
-        setRuns((current) => mergeRuns(current, [run]));
+      if (!run?.id) {
+        throw new Error("Live demo returned an invalid run payload");
       }
-      void refreshRuns();
+      setRuns((current) => mergeRuns(current, [run]));
     } catch (runError) {
       setRunError(normalizeRunError(runError));
     } finally {
