@@ -110,6 +110,13 @@ npm run dev:middleware
 npm run dev:app
 ```
 
+Default local addresses:
+
+- frontend: `http://127.0.0.1:3000`
+- middleware: `http://127.0.0.1:8787`
+- honest server: `http://127.0.0.1:8788`
+- malicious server: `http://127.0.0.1:8789`
+
 The middleware exposes:
 
 - `GET /health`
@@ -157,6 +164,29 @@ Copy `.env.example` and set:
 
 The public facilitator used by the demo is `https://www.x402.org/facilitator`.
 
+## Quick start
+
+Install dependencies:
+
+```bash
+npm install --legacy-peer-deps
+```
+
+Run the full devnet demo stack in separate terminals:
+
+```bash
+npm run demo:honest
+npm run demo:malicious
+npx tsx middleware/src/index.ts
+npm run dev:app
+```
+
+Smoke-check the middleware path:
+
+```bash
+npm run devnet:smoke
+```
+
 ## Demo outcomes
 
 The dashboard is optimized around exactly three judge-facing scenarios:
@@ -177,6 +207,25 @@ The UI shows:
 Current program id:
 
 - `x402_escrow`: `CTRDkdc7fN427u2p3gVHJvosy2GihnRwer5T6CM98xtH`
+
+Verified devnet assets:
+
+- buyer: `GDf1HviXTMZaivFgTEV1JbjnAyqVHbTAv98qzqQLrV9J`
+- seller: `GwESw1qndUrdc5XjrhRsyA8YztNf4q76AtJAw7LUsUn1`
+
+## Verified devnet run
+
+Validated on `2026-03-24` with the real devnet program and live x402 middleware flow.
+
+- success flow
+  - create escrow: `2UMbTjxw9piuoUXrE3k2cgKSoZUFqymgD2nU5mwAuf8uQEwP2bbxGxcabYq7iC4nvJauXHHMtY2TwK81jD1RZXL2`
+  - commit hash: `3EVG4TtkAYAetMJ9atNpEvyq3EreDpSrRdJZgt39XCLDcBjN2ggJD4GQFCMDm4fyKzTqqjMPFtC7XiRYyvFXFKG9`
+  - release: `4tydUFP2n4HCV2ckGmC4x75v4o4i3UjT6zh6Z98exyPTy9vktBTgRWUV1c435SXh2Bgj6Ja48o3wBZHATygEx6sv`
+- timeout refund flow
+  - create escrow: `26sabNNn9LBg2Vn8D2JXRKQGGNZnPrf3SxNa3T6iiCcWmyX1AuBbSDT5YWe7eY4xxpgU5C9DZQic2YPTnHuATuh2`
+  - refund: `5aSNGeAHFo7auMVGDVmTBT2WxbTmhqhYhgaLf3m8KKDQU8dx89cNzDRBqS92Q8ogG9phkxJPKC5X58dGzrCNwsRt`
+
+The `no_escrow` path was also validated through the middleware run registry and surfaces the direct-loss state in the UI.
 
 ## Submission assets
 
