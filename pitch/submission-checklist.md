@@ -24,11 +24,12 @@
 
 - File target: `pitch/x402-escrow-protocol.pdf`
 - Use `pitch/deck-outline.md` as the master outline
+- Use `pitch/manus-deck-prompt.md` as the copy-paste prompt for Manus
 - Keep to 10 slides maximum
 
 ## Video
 
-- Duration target: `60s` primary, `2-3 min` extended cut optional
+- Duration target: `5 min` primary, `60s` cutdown
 - Use `pitch/demo-script.md`
 - Show exactly three scenarios:
   - `Without Escrow`

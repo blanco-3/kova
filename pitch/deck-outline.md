@@ -3,64 +3,80 @@
 ## Slide 1 — Title
 
 - x402 Escrow Protocol
-- Solana-native escrow for x402 agent payments
-- One-liner: payment only releases when service delivery is proven
+- Proof-of-delivery escrow for x402 payments on Solana
+- Promise: keep the x402 UX, change the settlement logic underneath it
+- Visual: title + tracker screenshot or hero product shot
 
-## Slide 2 — Problem
+## Slide 2 — The Gap
 
-- x402 unlocked HTTP-native payment
-- it did not solve atomicity between payment and delivery
-- show three failures: rugpull, downtime, chained-agent partial loss
+- x402 enables HTTP-native payment transport
+- it does not make payment and delivery atomic
+- the buyer can still pay before delivery is proven
+- Visual: `Without Escrow` lane ending in `lost`
 
-## Slide 3 — Evidence
+## Slide 3 — Failure Modes
 
-- A402 quote on missing end-to-end atomicity
-- PANews two-phase settlement latency and failure point
-- DEV.to comparison: x402 is transport, not coordination
-- x402 activity decline as a trust-infra signal
+- paid, but the seller never delivers
+- paid, but the server fails after payment
+- the same trust gap compounds in longer agent flows
+- live demo scope is the first case: one buyer, one seller, one delivery result
+- Visual: three compact failure cards
 
-## Slide 4 — Solution
+## Slide 4 — What We Change
 
-- escrow vault sits between x402 payment demand and service release
-- commit-reveal for delivered result bytes
-- dual timeouts protect both buyer and seller
+- the service still returns a real `402 Payment Required`
+- middleware intercepts the paywall before direct settlement
+- buyer funds a PDA-backed USDC escrow instead of paying the seller directly
+- seller only gets paid after provable delivery
+- Visual: before/after architecture split
 
-## Slide 5 — Protocol flow
+## Slide 5 — On-chain Flow
 
-- 402 issued
-- escrow funded
-- seller commits result hash
-- buyer verifies bytes
-- release or refund
+- `create_escrow`
+- `commit_result_hash`
+- `verify_and_release`
+- `claim_timeout_refund`
+- `reject_result`
+- Statuses to show: `Created -> HashCommitted -> Completed`, `Created -> Refunded`, `HashCommitted -> Disputed`
+- Visual: state machine diagram
 
-## Slide 6 — Why Solana
+## Slide 6 — Live Demo Outcomes
 
-- PDA vault derivation
-- CPI with SPL Token
-- low cost escrow
-- fast finality
-- parallel execution for many escrows
+- `Without Escrow` -> `lost` in the runtime/UI
+- `Delivery Failure Protection` -> `refunded`
+- `Honest Trade` -> `released`
+- use the exact run order: `Without Escrow -> Delivery Failure Protection -> Honest Trade`
+- Visual: three scenario columns with terminal states
 
-## Slide 7 — Live demo
+## Slide 7 — Why Solana
 
-- honest trade releases
-- malicious seller refunds
-- direct x402 path loses funds
+- PDA vaults isolate escrow accounts without private-key management
+- SPL Token CPI gives programmable USDC settlement
+- fast finality makes live demo settlement understandable on stage
+- low fees make on-chain escrow practical
+- Visual: Solana capability callouts, not generic chain marketing
 
-## Slide 8 — Differentiation
+## Slide 8 — Proof Surface
 
-- MCPay / Latinum / Corbits / A402 / ACP comparison table
-- highlight: only Solana on-chain x402 escrow with delivery guarantee
+- tracker shows `escrowPda`, transaction signatures, and `resultHash`
+- README contains a verified devnet run with create, commit, release, and refund signatures
+- local demo runs through middleware at `127.0.0.1:8787`
+- public deployment is a frontend plus public backend on Cloud Run
+- Visual: tracker crop plus shortened devnet signatures
 
-## Slide 9 — Roadmap
+## Slide 9 — Scope Boundary and Roadmap
 
-- quality verification
-- multi-agent chaining beyond A -> B
-- third-party arbitration
+- v1 proves delivery, not service quality
+- current demo is buyer/seller only
+- out of scope for now: mainnet, arbitration, long multi-agent chains
+- roadmap: richer dispute handling, longer agent flows, broader deployment
+- Visual: now / next split
 
-## Slide 10 — Team / Ask
+## Slide 10 — Close
 
-- team intro
-- Seoulana WarmUp target
-- Colosseum continuation
-
+- x402 transports payment
+- escrow makes delivery enforceable
+- repo URL
+- demo URL
+- ask: judge the system on live proof, not just the claim
+- Visual: closing statement + CTA

@@ -6,7 +6,7 @@ x402 Escrow Protocol
 
 ## One-line description
 
-Solana-native escrow for x402 payments that releases funds only after service delivery is proven.
+Proof-of-delivery escrow for x402 payments on Solana.
 
 ## Short description
 
@@ -23,6 +23,13 @@ The live demo shows three outcomes:
 ## Why it matters
 
 This project adds the missing trust layer for agent commerce. x402 can transport payment, but escrow is what makes service delivery enforceable.
+
+## Claim discipline
+
+- v1 proves delivery, not service quality
+- `lost` is a runtime/UI state for the direct path, not an on-chain escrow state
+- the local demo runs through the middleware at `http://127.0.0.1:8787`
+- the public deployed service is a frontend plus public backend on Cloud Run
 
 ## Repository
 

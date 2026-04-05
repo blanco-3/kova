@@ -137,6 +137,21 @@ export function DemoDashboard({ locale }: { locale: Locale }) {
         throw new Error("Live demo returned an invalid run payload");
       }
       setRuns((current) => mergeRuns(current, [run]));
+
+      // Poll until terminal state
+      const terminalStates = new Set(["completed", "refunded", "lost", "disputed"]);
+      for (let i = 0; i < 60; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        try {
+          const pollRes = await fetch(`${apiBase}/api/escrows/${run.id}`);
+          if (!pollRes.ok) break;
+          const updated = (await pollRes.json()) as DemoRun;
+          setRuns((current) => mergeRuns(current, [updated]));
+          if (terminalStates.has(updated.status)) break;
+        } catch {
+          // ignore transient poll errors
+        }
+      }
     } catch (runError) {
       setRunError(normalizeRunError(runError));
     } finally {
